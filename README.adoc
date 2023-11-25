@@ -14,6 +14,7 @@ For a complete walkthrough of this repository, link:https://graphacademy.neo4j.c
 == Setup your Config
 
 To set config, create a `.env.local` with connection details for your Neo4j Sandbox instance and an OpenAI API Key.
+You can also configure the name and description of the chatbot, and the initial greeting message.
 
 [source]
 ----
@@ -22,6 +23,12 @@ NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your-generated-password
 
 OPENAI_API_KEY=sk-...
+
+NEXT_PUBLIC_CHATBOT_NAME=Ebert
+NEXT_PUBLIC_CHATBOT_DESCRIPTION="The Movie Recommendation Chatbot"
+NEXT_PUBLIC_CHATBOT_GREETING="Hello, I'm **Ebert**, your movie recommendation bot! How can I help you today?"
+
+
 ----
 
 

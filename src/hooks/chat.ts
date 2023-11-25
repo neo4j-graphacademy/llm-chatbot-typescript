@@ -7,8 +7,7 @@ export default function useChat() {
   const [thinking, setThinking] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
     new AIMessage({
-      content:
-        "Hello, I'm  **Ebert**, your movie recommendation bot!  How can I help you today?",
+      content: process.env.NEXT_PUBLIC_CHATBOT_GREETING as string
     }),
   ]);
   const container = useRef<HTMLDivElement>(null);

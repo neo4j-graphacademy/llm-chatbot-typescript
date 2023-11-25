@@ -17,10 +17,10 @@ export default function Home() {
       >
         <div className="p-4  bg-blue-800 flex flex-row justify-between">
           <h1 className="text-white">
-            <span className="font-bold">🎬 Ebert -</span>
+            <span className="font-bold">{process.env.NEXT_PUBLIC_CHATBOT_NAME} -</span>
             <span className="text-blue-100">
               {" "}
-              The Movie Recommendation Chatbot
+              {process.env.NEXT_PUBLIC_CHATBOT_DESCRIPTION}
             </span>
           </h1>
         </div>
@@ -40,7 +40,7 @@ export default function Home() {
 
         <div className="flex flex-row justify-between b-slate-200 px-4 pb-4 bg-slate-100 text-xs text-slate-600">
           <div className="animate-pulse">
-            {thinking ? "🤔 Ebert is thinking..." : " "}
+            {thinking ? `🤔 ${process.env.NEXT_PUBLIC_CHATBOT_NAME} is thinking...` : " "}
           </div>
           <div>
             Powered by

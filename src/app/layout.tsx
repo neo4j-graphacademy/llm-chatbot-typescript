@@ -1,15 +1,9 @@
 import type { Metadata } from 'next'
-import { Public_Sans } from 'next/font/google'
-
-// import '@neo4j-ndl/base/lib/neo4j-ds-styles.css';
 import './globals.css';
 
-const font = Public_Sans({subsets: ['latin']})
-
-
 export const metadata: Metadata = {
-  title: 'Ebert',
-  description: 'A Neo4j-backed Movie Recommendations Chatbot',
+  title: process.env.NEXT_PUBLIC_CHATBOT_NAME || 'Chatbot Name',
+  description: process.env.NEXT_PUBLIC_CHATBOT_DESCRIPTION || 'Chatbot Description',
 }
 
 export default function RootLayout({
