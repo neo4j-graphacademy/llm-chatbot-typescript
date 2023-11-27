@@ -1,4 +1,4 @@
-= Build an Neo4j-backed Chatbot using Python
+= Build an Neo4j-backed Chatbot using TypeScript
 
 This repository accompanies the link:https://graphacademy.neo4j.com/courses/llm-chatbot-typescript/?ref=github[Build an Neo4j-backed Chatbot using TypeScript^] course on link:https://graphacademy.neo4j.com/?ref=github[Neo4j GraphAcademy^].
 

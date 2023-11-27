@@ -17,9 +17,15 @@ export default function Message({
       <div className="flex flex-col space-y-2 text-sm mx-2 max-w-[60%] order-2 items-start">
         <div className={`bg-${background}-100 p-4 rounded-xl ${no_rounding}`}>
           <div className={`text-${background}-400`}>{message.name}</div>
+
           <div
             dangerouslySetInnerHTML={{
-              __html: parse(message.content.toString()),
+              __html: !message.content
+                ? JSON.stringify(message)
+                : parse(message.content.toString()).replace(
+                    '<a href="',
+                    '<a target="_blank" href="'
+                  ),
             }}
           />
           {/* <time className={`text-xs font-bold text-${background}-400`}>

@@ -1,3 +1,4 @@
+import { sleep } from "@/utils";
 import { FormEvent, KeyboardEventHandler, RefObject, useState } from "react";
 
 export default function Form({
@@ -9,12 +10,16 @@ export default function Form({
 }) {
   const [message, setMessage] = useState<string>("");
 
-  const handleSubmit = (event?: FormEvent<HTMLFormElement> | SubmitEvent) => {
+  const handleSubmit = async (
+    event?: FormEvent<HTMLFormElement> | SubmitEvent
+  ) => {
     event?.preventDefault();
 
-    if (message.length > 0) {
+    if (message.trim().length > 0) {
       onSubmit(message);
-      setTimeout(() => setMessage(""), 100);
+
+      await sleep(100);
+      setMessage("");
 
       container.current?.scrollBy(0, 100);
     }
