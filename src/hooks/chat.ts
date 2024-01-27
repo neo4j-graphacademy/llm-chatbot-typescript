@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AIMessage, HumanMessage } from "langchain/schema";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 type Message = AIMessage | HumanMessage;
 

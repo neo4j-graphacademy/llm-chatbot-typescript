@@ -1,5 +1,5 @@
 import { parse } from "marked";
-import { HumanMessage, AIMessage } from "langchain/schema";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 
 export default function Message({
   message,

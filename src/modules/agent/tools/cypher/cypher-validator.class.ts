@@ -1,4 +1,4 @@
-import { Neo4jGraph } from "langchain/graphs/neo4j_graph";
+import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 
 export class Relationship {
   constructor(
@@ -448,3 +448,6 @@ export class CypherValidator {
     return correctedQuery;
   }
 }
+
+
+
