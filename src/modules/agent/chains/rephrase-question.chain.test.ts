@@ -11,7 +11,7 @@ import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages"
 
 describe('Rephrase Question Chain', () => {
     let llm: BaseChatModel
-    let chain: RunnableSequence<RephraseQuestionInput, string>
+    let chain: RunnableSequence
     let evalChain: RunnableSequence<any, any>
 
     beforeAll(async () => {
@@ -71,7 +71,7 @@ describe('Rephrase Question Chain', () => {
 
             const evaluation = await evalChain.invoke({ input, response })
             expect(`${evaluation.toLowerCase()} - ${response}`).toContain('yes')
-        })
+        }, 10000)
 
         // TODO: Reinstate and fix prompt
         // it('should ask for clarification if a question does not make sense', async () => {
