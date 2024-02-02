@@ -1,5 +1,5 @@
 import { config } from "dotenv"
-import initGenerateAnswerChain from "./answer-generation.chain"
+import initGenerateAnswerChain from "../src/modules/agent/chains/answer-generation.chain"
 import { BaseChatModel } from "langchain/chat_models/base"
 import { RunnableSequence } from "@langchain/core/runnables"
 import { ChatOpenAI } from "@langchain/openai"
