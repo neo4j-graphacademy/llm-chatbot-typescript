@@ -1,101 +1,111 @@
 import { Embeddings } from "@langchain/core/embeddings";
-import { BaseLanguageModel } from "langchain/base_language";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import { initRetrievalChain } from "./tools/vector-retrieval.chain";
-import { initCypherQAChain } from "./tools/cypher/cypher-qa.chain";
-import { DynamicTool } from "@langchain/core/tools";
+import {
+  DynamicStructuredTool,
+  DynamicTool,
+  StructuredTool,
+} from "@langchain/core/tools";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
+import {
+  AgentExecutor,
+  createOpenAIFunctionsAgent,
+  createReactAgent,
+} from "langchain/agents";
 import { pull } from "langchain/hub";
-import initRephraseChain from "./chains/rephrase-question.chain";
+import initRephraseChain, {
+  RephraseQuestionInput,
+} from "./chains/rephrase-question.chain";
 import { BaseChatModel } from "langchain/chat_models/base";
-import { RunnablePassthrough, RunnableSequence } from "@langchain/core/runnables";
-import { getHistory, saveHistory } from "./history";
-import { BaseMessage } from "langchain/schema";
-import { StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnablePassthrough } from "@langchain/core/runnables";
+import { getHistory } from "./history";
+import { initVectorRetrievalChain } from "./tools/vector-retrieval.chain";
+import initCypherRetrievalChain from "./tools/cypher/cypher-retrieval.chain";
+import {
+  AgentToolInput,
+  AgentToolInputSchema,
+  ChatAgentInput,
+} from "./agent.types";
 
+export default async function initAgent(
+  llm: BaseChatModel,
+  embeddings: Embeddings,
+  graph: Neo4jGraph
+) {
+  const retrievalChain = await initVectorRetrievalChain(llm, embeddings);
+  const cypherChain = await initCypherRetrievalChain(llm, graph);
 
-export default async function initAgent(llm: BaseChatModel, embeddings: Embeddings, graph: Neo4jGraph) {
-    const retrievalChain = await initRetrievalChain(llm, embeddings)
-    const cypherChain = await initCypherQAChain(llm, graph)
+  const tools = [
+    new DynamicStructuredTool({
+      name: "graph-cypher-retrieval-chain",
+      description:
+        "For retrieving movie information from the database including movie recommendations, actors and user ratings",
+      schema: AgentToolInputSchema,
+      func: (input, runManager_, config) => {
+        console.log("func", { config });
 
-    const tools = [
-        new DynamicTool({
-            name: 'graph-cypher-qa-chain',
-            description: "For retrieving movie information from the database including movie recommendations, actors and user ratings",
-             func: async (input) => cypherChain.invoke(input),
-        }),
-        new DynamicTool({
-            name: "neo4j-vector-retrieval-qa",
-            description: "For finding or comparing movies by their plot",
-            func: async (input: any) => {
-                const res = await retrievalChain.invoke(input)
-                return res.answer
-            }
-      }),
-    ]
+        return cypherChain.invoke(input, config);
+      },
+    }),
+    // new DynamicStructuredTool({
+    //   name: "graph-vector-retrieval-chain",
+    //   description: "For finding or comparing movies by their plot",
+    //   schema: AgentToolInputSchema,
+    //   // @ts-ignore
+    //   func: (input, runManager_, config) =>
+    //     retrievalChain.invoke(input, config),
+    // }),
+  ];
 
-    const prompt = await pull<ChatPromptTemplate>(
-        "hwchase17/openai-functions-agent"
-      );
+  const prompt = await pull<ChatPromptTemplate>(
+    "hwchase17/openai-functions-agent"
+  );
+  // const prompt = await pull<ChatPromptTemplate>("hwchase17/react");
 
-      // agent = await createReactAgent({
-      const agent = await createOpenAIFunctionsAgent({
-        llm,
-        tools,
-        prompt,
-        // prompt: agentprompt,
-      });
+  // const agent = await createReactAgent({
+  const agent = await createOpenAIFunctionsAgent({
+    llm,
+    tools,
+    prompt,
+    // prompt: agentprompt,
+  });
 
-      const executor = new AgentExecutor({
-        agent,
-        tools,
-        verbose: true,
-      });
+  const executor = new AgentExecutor({
+    agent,
+    tools,
+    // verbose: true,
+  });
 
-      const rephraseQuestionChain = await initRephraseChain(llm)
+  const rephraseQuestionChain = await initRephraseChain(llm);
 
-      return RunnableSequence.from<{input: string}, string>([
-          // {input: string}
-          RunnablePassthrough.assign({
-            // Assign a response ID up front
-            // TODO: Generate a UUID
-            // TODO: Move to a configurable?
-            responseId: () => Math.random().toString(),
-            // Get Message History
-            history: (input_, options) => getHistory(options?.config.configurable.sessionId),
-          }),
-          // {input: string, responseId: string, history: string}
-          RunnablePassthrough.assign({
-            // Rephrase the question
-            rephrasedQuestion: (input: { input: string, history: BaseMessage[], responseId: string }) => rephraseQuestionChain.invoke(input),
-          }),
-          // {input: string, responseId: string, history: BaseMessage, rephrasedQuestion: string}
-          RunnablePassthrough.assign({
-            // Get the response - tool will save info to graph using responseId
-            output: async (input: { input: string, history: BaseMessage[], responseId: string, rephrasedQuestion: string }, options) => {
-              const res = await executor.invoke({ input: input.rephrasedQuestion }, { configurable: { sessionId: options?.config.sessionId }})
-              return res.output
-            },
-          }),
-          // {input: string, responseId: string, history: BaseMessage, rephrasedQuestion: string, output: string}
-          RunnablePassthrough.assign({
-            responseId: async (input, options): Promise<string | undefined> => {
-              if (options?.config.sessionId) {
-                await saveHistory(options?.config.sessionId, "human", input, undefined);
-                const id = await saveHistory(options?.config.sessionId, "ai", input.output, input.responseId);
+  return (
+    RunnablePassthrough.assign<{ input: string; sessionId: string }, any>({
+      // Get Message History
+      history: async (input_, options) => {
+        const history = await getHistory(
+          options?.config.configurable.sessionId
+        );
 
-                return id
-              }
-            },
-          }),
-          // {input: string, history: BaseMessage, rephrasedQuestion: string, output: string, responseId: string }
-          // TODO: stream
-          (res) => {
-            console.log('>>', res);
+        return history;
+      },
+    })
+      .assign({
+        // Use History to rephrase the question
+        rephrasedQuestion: (input: RephraseQuestionInput, config: any) =>
+          rephraseQuestionChain.invoke(input, config),
+      })
 
-            return res.output
-          }
-        ]);
+      // Pass to the executor
+      .assign({
+        output: async (input, options) => {
+          console.log("before", options?.configurable.sessionId);
 
+          const res = await executor.invoke(input, {
+            configurable: { sessionId: options?.configurable.sessionId },
+          });
+
+          return res.output;
+        },
+      })
+      .pick("output")
+  );
 }

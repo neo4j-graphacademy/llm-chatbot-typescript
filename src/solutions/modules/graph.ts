@@ -33,8 +33,9 @@ export async function initDriver(): Promise<Driver> {
 let graph: Neo4jGraph;
 
 /**
- * <2> Return the existing `graph` object or create one
+ * Return the existing `graph` object or create one
  * has not already been created
+ *
  * @returns {Promise<Neo4jGraph>}
  */
 export async function initGraph(): Promise<Neo4jGraph> {

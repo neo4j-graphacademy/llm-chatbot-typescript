@@ -1,53 +1,63 @@
-import initAgent from './agent'
-import { config } from 'dotenv'
+import initAgent from "./agent";
+import { config } from "dotenv";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { Embeddings } from 'langchain/embeddings/base';
-import { BaseChatModel } from 'langchain/chat_models/base';
-import { RunnableSequence } from '@langchain/core/runnables';
-import { Neo4jGraph } from '@langchain/community/graphs/neo4j_graph';
+import { Embeddings } from "langchain/embeddings/base";
+import { BaseChatModel } from "langchain/chat_models/base";
+import { Runnable, RunnableSequence } from "@langchain/core/runnables";
+import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 
-describe('Langchain Agent', () => {
-    let llm: BaseChatModel
-    let embeddings: Embeddings
-    let graph: Neo4jGraph
-    let executor: RunnableSequence
+describe("Langchain Agent", () => {
+  let llm: BaseChatModel;
+  let embeddings: Embeddings;
+  let graph: Neo4jGraph;
+  let executor: Runnable;
 
-    beforeAll(async () => {
-        config({path: '.env.local'})
+  beforeAll(async () => {
+    config({ path: ".env.local" });
 
-        graph = new Neo4jGraph({
-            url: process.env.NEO4J_URI as string,
-            username: process.env.NEO4J_USERNAME as string,
-            password: process.env.NEO4J_PASSWORD as string,
-            database: process.env.NEO4J_DATABASE as string | undefined,
-        });
+    graph = await Neo4jGraph.initialize({
+      url: process.env.NEO4J_URI as string,
+      username: process.env.NEO4J_USERNAME as string,
+      password: process.env.NEO4J_PASSWORD as string,
+      database: process.env.NEO4J_DATABASE as string | undefined,
+    });
 
-        llm = new ChatOpenAI({
-            openAIApiKey: process.env.OPENAI_API_KEY,
-            modelName: "gpt-4",
-            temperature: 0,
-        });
+    llm = new ChatOpenAI({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+      modelName: "gpt-4",
+      temperature: 0,
+    });
 
-        embeddings = new OpenAIEmbeddings({
-            openAIApiKey: process.env.OPENAI_API_KEY as string,
-        });
+    embeddings = new OpenAIEmbeddings({
+      openAIApiKey: process.env.OPENAI_API_KEY as string,
+    });
 
+    executor = await initAgent(llm, embeddings, graph);
+  });
 
-        executor = await initAgent(llm, embeddings, graph)
-    })
+  describe("Question Rephrasing", () => {
+    it("should ask the original question", () => {});
 
-    describe('Vector Retrieval', () => {
-        it('should perform RAG using the neo4j vector retriever', async () => {
-            const sessionId = '1234'
-            const input = 'Recommend me a movie about ghosts'
+    it("should use history to rephrase a question", () => {});
+  });
 
-            const res = await executor.invoke({
-                input,
-            }, { configurable: {
-                sessionId,
-            } })
+  describe("Vector Retrieval", () => {
+    it("should perform RAG using the neo4j vector retriever", async () => {
+      const sessionId = "1234";
+      const input = "Recommend me a movie about ghosts";
 
-            expect(res).toContain('Ghost')
-        })
-    })
-})
+      const res = await executor.invoke(
+        {
+          input,
+        },
+        {
+          configurable: {
+            sessionId,
+          },
+        }
+      );
+
+      expect(res).toContain("Ghost");
+    }, 20000);
+  });
+});

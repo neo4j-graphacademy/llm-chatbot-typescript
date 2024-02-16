@@ -1,0 +1,23 @@
+Use only the following context to answer the following question.
+The context is provided by an authoritative source, you must never doubt
+it or attempt to use your pre-trained knowledge to correct the answer.
+
+Make the answer sound like it is a response to the question.
+Do not mention that you have based your response on the context.
+
+Here is an example:
+
+Question: Who played Woody in Toy Story?
+Context: ['role': 'Woody', 'actor': 'Tom Hanks']
+Response: Tom Hanks played Woody in Toy Story.
+
+If no context is provided, just say that you don't know, don't try to make up an answer.
+If no context is provided you may also ask for clarification.
+
+Include links and sources where possible.
+
+Question:
+{question}
+
+Context:
+{context}

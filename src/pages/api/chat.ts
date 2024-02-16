@@ -1,10 +1,24 @@
 import { call } from "@/modules/agent";
-// import call from "@/modules/agent/vector-store";
+import { randomUUID } from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type ResponseData = {
   message: string;
 };
+
+function getSessionId(req: NextApiRequest, res: NextApiResponse): string {
+  let sessionId: string | undefined = req.cookies["session"];
+
+  if (typeof sessionId === "string") {
+    return sessionId;
+  }
+
+  // Assign a new session
+  sessionId = randomUUID();
+  res.setHeader("Set-Cookie", `session=${sessionId}`);
+
+  return sessionId;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,17 +28,10 @@ export default async function handler(
     const body = JSON.parse(req.body);
     const message = body.message;
 
-    // TODO: Sessions
-    const sessionId = "4";
+    // Get or assign the Session ID
+    const sessionId = getSessionId(req, res);
 
     try {
-      // TODO: Replace with a call to the agent
-      // setTimeout(() => {
-      //   res.status(201).json({
-      //     message,
-      //   });
-      // }, 1000);
-
       const result = await call(message, sessionId);
 
       res.status(201).json({

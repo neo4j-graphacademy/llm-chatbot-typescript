@@ -9,7 +9,7 @@ import { BaseLanguageModel } from "langchain/base_language";
 import initVectorStore from "../vector.store";
 import { saveHistory } from "../history";
 import { DocumentInterface } from "@langchain/core/documents";
-import { AgentToolInput } from "../agent.types";
+import { AgentToolInput } from "../../../../modules/agent/agent.types";
 
 // tag::throughput[]
 type RetrievalChainThroughput = AgentToolInput & {
@@ -37,18 +37,6 @@ export async function initVectorRetrievalChain(
   llm: BaseLanguageModel,
   embeddings: Embeddings
 ): Promise<Runnable<AgentToolInput, string>> {
-  // TODO: Create vector store instance
-  // const vectorStore = ...
-
-  // TODO: Initialize a retriever wrapper around the vector store
-  // const vectorStoreRetriever = ...
-
-  // TODO: Initialize Answer chain
-  // const answerChain = ...
-
-  // TODO: Return chain
-  // return RunnablePassthrough.assign( ... )
-
   // tag::vectorstore[]
   //  Create vector store instance
   const vectorStore = await initVectorStore(embeddings);
@@ -83,6 +71,7 @@ export async function initVectorRetrievalChain(
       // end::mutatecontext[]
       // tag::answer[]
       .assign({
+        // Generate an answer to the question
         output: (input: RetrievalChainThroughput) =>
           answerChain.invoke({
             question: input.rephrasedQuestion,
@@ -91,8 +80,9 @@ export async function initVectorRetrievalChain(
       })
       // end::answer[]
       // tag::save[]
+      // Save the response to the database
       .assign({
-        responseId: async (input: RetrievalChainThroughput, options) =>
+        responseId: (input: RetrievalChainThroughput, options) =>
           saveHistory(
             options?.config.configurable.sessionId,
             input.input,
@@ -103,6 +93,7 @@ export async function initVectorRetrievalChain(
       })
       // end::save[]
       // tag::output[]
+      // Return only the output
       .pick("output")
   );
   // end::output[]

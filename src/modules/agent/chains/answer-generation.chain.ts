@@ -1,3 +1,30 @@
+/* TODO: Uncomment
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import {
+  PromptTemplate,
+} from "@langchain/core/prompts";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { BaseLanguageModel } from "langchain/base_language";
+
+// tag::interface[]
+export interface GenerateAnswerInput {
+  question: string;
+  context: string;
+}
+// end::interface[]
+
+// tag::function[]
+export default function initGenerateAnswerChain(llm: BaseLanguageModel): RunnableSequence<GenerateAnswerInput, string> {
+    // TODO: Create a Prompt Template
+    // const answerQuestionPrompt = PromptTemplate.fromTemplate(`
+
+    // TODO: Return a RunnableSequence
+    // return RunnableSequence.from<GenerateAnswerInput, string>([])
+
+}
+// end::function[]
+*/
+
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";

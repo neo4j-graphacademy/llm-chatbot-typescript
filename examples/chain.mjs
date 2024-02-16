@@ -7,24 +7,27 @@ Your role is to assist your customer with their fruit and vegetable needs.
 Respond using cockney rhyming slang.
 
 Tell me about the following fruit: {fruit}
-`)
+`);
 // end::prompt[]
 
 // tag::llm[]
 import { ChatOpenAI } from "@langchain/openai";
 
 const llm = new ChatOpenAI({
-    openAIApiKey: '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',
-})
+  openAIApiKey: "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",
+});
 // end::llm[]
 
 // tag::parser[]
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-const parser = new StringOutputParser()
+const parser = new StringOutputParser();
 // end::parser[]
 // tag::passthrough[]
-import { RunnablePassthrough, RunnableSequence } from "@langchain/core/runnables";
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+} from "@langchain/core/runnables";
 // end::passthrough[]
 
 /**
@@ -46,20 +49,15 @@ end::types[]
 */
 
 // tag::chain[]
-const chain = RunnableSequence.from([
-    prompt,
-    llm,
-    parser,
-])
+const chain = RunnableSequence.from([prompt, llm, parser]);
 // end::chain[]
 
 const main = async () => {
-    // tag::invoke[]
-    const response  = await chain.invoke({fruit: 'pineapple'})
+  // tag::invoke[]
+  const response = await chain.invoke({ fruit: "pineapple" });
 
-    console.log(response)
-    // end::invoke[]
-}
+  console.log(response);
+  // end::invoke[]
+};
 
-main()
-
+main();

@@ -399,7 +399,9 @@ export class CypherValidator {
       if (!this.anyRelationshipTypeExists(relationshipTypes)) {
         errors.push(this.noRelationshipTypeError(relationshipTypes));
       }
-      // - If direction is OUTGOING, find schema items where `from` is the same as the first node label and `relationship` is the same as the relationship type
+      // - If direction is OUTGOING, find schema items where
+      // `from` is the same as the first node label and `relationship`
+      //  is the same as the relationship type
       else if (outgoing !== undefined) {
         const exists = this.anyRelationshipExists(
           leftLabels,
@@ -415,7 +417,9 @@ export class CypherValidator {
           query = query.replace(pattern, `(${left})<-[${rel}]-(${right})`);
         }
       }
-      // - if direction is incomingm find schema items where `to` is the same as the first node label and `relationship` is the same as the relationship type
+      // - if direction is incomingm find schema items where `to` is the
+      // same as the first node label and `relationship` is the same
+      // as the relationship type
       else if (incoming !== undefined) {
         const exists = this.anyRelationshipExists(
           rightLabels,
@@ -448,6 +452,3 @@ export class CypherValidator {
     return correctedQuery;
   }
 }
-
-
-

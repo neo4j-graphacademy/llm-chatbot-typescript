@@ -1,32 +1,53 @@
-import { sleep } from "@/utils";
-import { FormEvent, KeyboardEventHandler, RefObject, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEventHandler,
+  RefObject,
+  useRef,
+  useState,
+} from "react";
+import { AIMessage, HumanMessage } from "langchain/schema";
+
+type Message = AIMessage | HumanMessage;
 
 export default function Form({
   onSubmit,
+  messages,
   container,
 }: {
   onSubmit: (message: string) => void;
+  messages: Message[];
   container: RefObject<HTMLDivElement>;
 }) {
+  const input = useRef<HTMLTextAreaElement>(null);
   const [message, setMessage] = useState<string>("");
 
-  const handleSubmit = async (
-    event?: FormEvent<HTMLFormElement> | SubmitEvent
-  ) => {
+  const handleSubmit = (event?: FormEvent<HTMLFormElement> | SubmitEvent) => {
     event?.preventDefault();
 
     if (message.trim().length > 0) {
       onSubmit(message);
-
-      await sleep(100);
-      setMessage("");
+      setTimeout(() => setMessage(""), 100);
 
       container.current?.scrollBy(0, 100);
     }
   };
 
-  const submitOnCmdEnter: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-    if (!e.shiftKey && e.key === "Enter") {
+  const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+    if (e.key === "ArrowUp") {
+      const lastHuman = messages
+        .reverse()
+        .find((m) => m._getType() === "human");
+
+      if (lastHuman) {
+        setMessage(lastHuman.content as string);
+      }
+      setTimeout(() => {
+        if (input.current) {
+          input.current.selectionStart = input.current.value.length;
+          input.current.selectionEnd = input.current.value.length;
+        }
+      }, 20);
+    } else if (!e.shiftKey && e.key === "Enter") {
       handleSubmit();
     }
   };
@@ -39,11 +60,12 @@ export default function Form({
       <div className="flex flex-row bg-white border border-slate-600 rounded-md w-full">
         <div className="flex-grow">
           <textarea
+            ref={input}
             value={message}
             rows={1}
             className="p-4 border-blue-600 rounded-md w-full outline-none focus:outline-none"
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={submitOnCmdEnter}
+            onKeyDown={handleKeyDown}
           />
         </div>
         <div className="px-4">
