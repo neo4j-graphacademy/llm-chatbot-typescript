@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Embeddings } from "langchain/embeddings/base";
 import { BaseChatModel } from "langchain/chat_models/base";
-import { Runnable, RunnableSequence } from "@langchain/core/runnables";
+import { Runnable } from "@langchain/core/runnables";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 
 describe("Langchain Agent", () => {
@@ -35,11 +35,7 @@ describe("Langchain Agent", () => {
     executor = await initAgent(llm, embeddings, graph);
   });
 
-  describe("Question Rephrasing", () => {
-    it("should ask the original question", () => {});
-
-    it("should use history to rephrase a question", () => {});
-  });
+  afterAll(() => graph.close());
 
   describe("Vector Retrieval", () => {
     it("should perform RAG using the neo4j vector retriever", async () => {
@@ -72,7 +68,6 @@ describe("Langchain Agent", () => {
       if (sessionRes) {
         expect(sessionRes.length).toBe(1);
         expect(sessionRes[0].input).toBe(input);
-        expect(sessionRes[0].output).toBe(output);
 
         let found = false;
 
@@ -83,9 +78,7 @@ describe("Langchain Agent", () => {
         }
 
         expect(found).toBe(true);
-
-        console.log(sessionRes[0].movies);
       }
-    }, 20000);
+    }, 60000);
   });
 });

@@ -10,6 +10,7 @@ import {
 export default function Form({
   onSubmit,
   messages,
+  thinking,
   container,
 }: {
   onSubmit: (message: string) => void;

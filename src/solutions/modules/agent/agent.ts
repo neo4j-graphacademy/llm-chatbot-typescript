@@ -2,6 +2,7 @@
 import { Embeddings } from "@langchain/core/embeddings";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
 import { pull } from "langchain/hub";
 import initRephraseChain, {
   RephraseQuestionInput,
@@ -10,7 +11,6 @@ import { BaseChatModel } from "langchain/chat_models/base";
 import { RunnablePassthrough } from "@langchain/core/runnables";
 import { getHistory } from "./history";
 import initTools from "./tools";
-import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
 
 // tag::function[]
 export default async function initAgent(
@@ -18,32 +18,20 @@ export default async function initAgent(
   embeddings: Embeddings,
   graph: Neo4jGraph
 ) {
-  // TODO: Initiate tools
-  // const tools = ...
-
-  // TODO: Pull the prompt from the hub
-  // const prompt = ...
-
-  // TODO: Create an agent
-  // const agent = ...
-
-  // TODO: Create an agent executor
-  // const executor = ...
-
-  // TODO: Create a rephrase question chain
-  // const rephraseQuestionChain = ...
-
   // tag::tools[]
+  // Initiate tools
   const tools = await initTools(llm, embeddings, graph);
   // end::tools[]
 
   // tag::prompt[]
+  // Pull the prompt from the hub
   const prompt = await pull<ChatPromptTemplate>(
     "hwchase17/openai-functions-agent"
   );
   // end::prompt[]
 
   // tag::agent[]
+  // Create an OpenAI Functions agent
   const agent = await createOpenAIFunctionsAgent({
     llm,
     tools,
@@ -52,6 +40,7 @@ export default async function initAgent(
   // end::agent[]
 
   // tag::executor[]
+  // Create an agent executor
   const executor = new AgentExecutor({
     agent,
     tools,
@@ -59,12 +48,14 @@ export default async function initAgent(
   // end::executor[]
 
   // tag::rephrasechain[]
+  // Create a rephrase question chain
   const rephraseQuestionChain = await initRephraseChain(llm);
   // end::rephrasechain[]
 
   // tag::history[]
+  // Return a Runnable
   return (
-    RunnablePassthrough.assign<{ input: string; sessionId: string }, any>({
+    RunnablePassthrough.assign<{ input: string }, any>({
       // Get Message History
       history: async (_input, options) => {
         const history = await getHistory(
@@ -85,11 +76,19 @@ export default async function initAgent(
 
       // tag::execute[]
       // Pass to the executor
-      .pipe(executor)
+      .assign({
+        output: async (input, options) => {
+          const res = await executor.invoke(input, {
+            configurable: { sessionId: options?.configurable.sessionId },
+          });
+
+          return res.output;
+        },
+      })
       // end::execute[]
       // tag::output[]
       .pick("output")
+    // end::output[]
   );
-  // end::output[]
 }
 // end::function[]

@@ -5,6 +5,7 @@ import initCypherRetrievalChain from "./cypher/cypher-retrieval.chain";
 import initVectorRetrievalChain from "./vector-retrieval.chain";
 import { DynamicStructuredTool } from "@langchain/community/tools/dynamic";
 import { AgentToolInputSchema } from "../agent.types";
+import { RunnableConfig } from "langchain/runnables";
 
 // tag::function[]
 export default async function initTools(
@@ -34,16 +35,15 @@ export default async function initTools(
       description:
         "For retrieving movie information from the database including movie recommendations, actors and user ratings",
       schema: AgentToolInputSchema,
-      // @ts-ignore
       func: (input, _runManager, config) => cypherChain.invoke(input, config),
     }),
     // end::cypher[]
     // tag::vector[]
     new DynamicStructuredTool({
       name: "graph-vector-retrieval-chain",
-      description: "For finding or comparing movies by their plot",
+      description:
+        "For finding movies, comparing movies by their plot or recommending a movie based on a theme",
       schema: AgentToolInputSchema,
-      // @ts-ignore
       func: (input, _runManager: any, config) =>
         retrievalChain.invoke(input, config),
     }),
