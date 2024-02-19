@@ -37,14 +37,14 @@ export default async function initAgent(
   const tools = await initTools(llm, embeddings, graph);
   // end::tools[]
 
-  /**
-
+  /** Pre-written prompt from LangChain hub
   // tag::prompt[]
- const prompt = await pull<ChatPromptTemplate>(
+  const prompt = await pull<ChatPromptTemplate>(
      "hwchase17/openai-functions-agent"
     );
   // end::prompt[]
   */
+
   // tag::scoped[]
   const prompt = ChatPromptTemplate.fromTemplate(`
     You are Ebert, a movie recommendation chatbot.
