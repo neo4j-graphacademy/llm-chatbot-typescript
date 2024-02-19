@@ -1,31 +1,29 @@
 import { parse } from "marked";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { Message } from "@/hooks/chat";
 
-export default function Message({
-  message,
-}: {
-  message: HumanMessage | AIMessage;
-}) {
-  const align = message?._getType() == "ai" ? "justify-start" : "justify-end";
+function fixMarkdown(message: Message): string {
+  return parse(message.content).replace(
+    '<a href="',
+    '<a target="_blank" href="'
+  );
+}
+
+export default function Message({ message }: { message: Message }) {
+  const align = message.role == "ai" ? "justify-start" : "justify-end";
   const no_rounding =
-    message?._getType() == "ai" ? "rounded-bl-none" : "rounded-br-none";
-  const background = message?._getType() == "ai" ? "blue" : "slate";
+    message.role == "ai" ? "rounded-bl-none" : "rounded-br-none";
+  const background = message.role == "ai" ? "blue" : "slate";
 
   return (
     <div className={`w-full flex flex-row ${align}`}>
       <span className="bg-blue-100"></span>
       <div className="flex flex-col space-y-2 text-sm mx-2 max-w-[60%] order-2 items-start">
         <div className={`bg-${background}-100 p-4 rounded-xl ${no_rounding}`}>
-          <div className={`text-${background}-400`}>{message.name}</div>
+          {/* <div className={`text-${background}-400`}>{message.role}</div> */}
 
           <div
             dangerouslySetInnerHTML={{
-              __html: !message.content
-                ? JSON.stringify(message)
-                : parse(message.content.toString()).replace(
-                    '<a href="',
-                    '<a target="_blank" href="'
-                  ),
+              __html: fixMarkdown(message),
             }}
           />
           {/* <time className={`text-xs font-bold text-${background}-400`}>

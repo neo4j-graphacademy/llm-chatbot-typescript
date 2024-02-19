@@ -1,14 +1,19 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import initVectorStore from "./vector.store";
 import { Neo4jVectorStore } from "@langchain/community/vectorstores/neo4j_vector";
+import { close } from "../graph";
 
 describe("Vector Store", () => {
+  afterAll(() => close());
+
   it("should instantiate a new vector store", async () => {
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
     });
     const vectorStore = await initVectorStore(embeddings);
     expect(vectorStore).toBeInstanceOf(Neo4jVectorStore);
+
+    await vectorStore.close();
   });
 
   it("should create a test index", async () => {
@@ -34,5 +39,7 @@ describe("Vector Store", () => {
 
     expect(index).toBeInstanceOf(Neo4jVectorStore);
     expect(index["indexName"]).toBe(indexName);
+
+    await index.close();
   });
 });

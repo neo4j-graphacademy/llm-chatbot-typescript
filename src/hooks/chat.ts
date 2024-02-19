@@ -1,21 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
-type Message = AIMessage | HumanMessage;
+export type Message = {
+  role: "human" | "ai";
+  content: string;
+};
 
 export default function useChat() {
   const [thinking, setThinking] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
-    new AIMessage({
+    {
+      role: "ai",
       content:
         process.env.NEXT_PUBLIC_CHATBOT_GREETING || "How can I help you today?",
-    }),
+    },
   ]);
   const container = useRef<HTMLDivElement>(null);
 
   const generateResponse = async (message: string): Promise<void> => {
     // Append human message
-    messages.push(new HumanMessage({ content: message }));
+    messages.push({ role: "human", content: message });
 
     // Set thinking to true
     setThinking(true);
@@ -30,7 +33,7 @@ export default function useChat() {
       // Append the API message to the state
       const json = await response.json();
 
-      messages.push(new AIMessage({ content: json.message }));
+      messages.push({ role: "ai", content: json.message });
 
       setMessages(messages);
     } catch (e) {

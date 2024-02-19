@@ -9,6 +9,10 @@ import React from "react";
 export default function Home() {
   const { messages, thinking, container, generateResponse } = useChat();
 
+  const thinkingText = `🤔 ${
+    process.env.NEXT_PUBLIC_CHATBOT_NAME || "Chatbot"
+  } is thinking...`;
+
   return (
     <>
       <div
@@ -42,18 +46,13 @@ export default function Home() {
 
         <Form
           messages={messages}
+          thinking={thinking}
           container={container}
           onSubmit={(m) => generateResponse(m)}
         />
 
         <div className="flex flex-row justify-between b-slate-200 px-4 pb-4 bg-slate-100 text-xs text-slate-600">
-          <div className="animate-pulse">
-            {thinking
-              ? `🤔 ${
-                  process.env.NEXT_PUBLIC_CHATBOT_NAME || "Chatbot"
-                } is thinking...`
-              : " "}
-          </div>
+          <div className="animate-pulse">{thinking ? thinkingText : " "}</div>
           <div>
             Powered by
             <a href="https://neo4j.com" target="_blank" className="font-bold">

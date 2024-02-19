@@ -43,10 +43,10 @@ describe("Langchain Agent", () => {
 
   describe("Vector Retrieval", () => {
     it("should perform RAG using the neo4j vector retriever", async () => {
-      const sessionId = "1234";
+      const sessionId = "agent-rag-1";
       const input = "Recommend me a movie about ghosts";
 
-      const res = await executor.invoke(
+      const output = await executor.invoke(
         {
           input,
         },
@@ -57,7 +57,35 @@ describe("Langchain Agent", () => {
         }
       );
 
-      expect(res).toContain("Ghost");
+      // Check database
+      const sessionRes = await graph.query(
+        `
+        MATCH (s:Session {id: $sessionId })-[:LAST_RESPONSE]->(r)
+        RETURN r.input AS input, r.output AS output, r.source AS source,
+          count { (r)-[:CONTEXT]->() } AS context,
+          [ (r)-[:CONTEXT]->(m) | m.title ] AS movies
+      `,
+        { sessionId }
+      );
+
+      expect(sessionRes).toBeDefined();
+      if (sessionRes) {
+        expect(sessionRes.length).toBe(1);
+        expect(sessionRes[0].input).toBe(input);
+        expect(sessionRes[0].output).toBe(output);
+
+        let found = false;
+
+        for (const movie of sessionRes[0].movies) {
+          if (output.toLowerCase().includes(movie.toLowerCase())) {
+            found = true;
+          }
+        }
+
+        expect(found).toBe(true);
+
+        console.log(sessionRes[0].movies);
+      }
     }, 20000);
   });
 });

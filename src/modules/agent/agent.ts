@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Embeddings } from "@langchain/core/embeddings";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import {
@@ -18,69 +19,48 @@ import initRephraseChain, {
 import { BaseChatModel } from "langchain/chat_models/base";
 import { RunnablePassthrough } from "@langchain/core/runnables";
 import { getHistory } from "./history";
-import { initVectorRetrievalChain } from "./tools/vector-retrieval.chain";
-import initCypherRetrievalChain from "./tools/cypher/cypher-retrieval.chain";
-import {
-  AgentToolInput,
-  AgentToolInputSchema,
-  ChatAgentInput,
-} from "./agent.types";
+
+import initTools from "./tools";
 
 export default async function initAgent(
   llm: BaseChatModel,
   embeddings: Embeddings,
   graph: Neo4jGraph
 ) {
-  const retrievalChain = await initVectorRetrievalChain(llm, embeddings);
-  const cypherChain = await initCypherRetrievalChain(llm, graph);
+  // tag::chains[]
+  const rephraseQuestionChain = await initRephraseChain(llm);
+  // end::chains[]
 
-  const tools = [
-    new DynamicStructuredTool({
-      name: "graph-cypher-retrieval-chain",
-      description:
-        "For retrieving movie information from the database including movie recommendations, actors and user ratings",
-      schema: AgentToolInputSchema,
-      func: (input, runManager_, config) => {
-        console.log("func", { config });
+  // tag::tools[]
+  const tools = await initTools(llm, embeddings, graph);
+  // end::tools[]
 
-        return cypherChain.invoke(input, config);
-      },
-    }),
-    // new DynamicStructuredTool({
-    //   name: "graph-vector-retrieval-chain",
-    //   description: "For finding or comparing movies by their plot",
-    //   schema: AgentToolInputSchema,
-    //   // @ts-ignore
-    //   func: (input, runManager_, config) =>
-    //     retrievalChain.invoke(input, config),
-    // }),
-  ];
-
+  // tag::prompt[]
   const prompt = await pull<ChatPromptTemplate>(
     "hwchase17/openai-functions-agent"
   );
-  // const prompt = await pull<ChatPromptTemplate>("hwchase17/react");
+  // end::prompt[]
 
-  // const agent = await createReactAgent({
+  // tag::agent[]
   const agent = await createOpenAIFunctionsAgent({
     llm,
     tools,
     prompt,
-    // prompt: agentprompt,
   });
+  // end::agent[]
 
+  // tag::executor[]
   const executor = new AgentExecutor({
     agent,
     tools,
-    // verbose: true,
   });
-
-  const rephraseQuestionChain = await initRephraseChain(llm);
+  // end::executor[]
 
   return (
+    // tag::history[]
     RunnablePassthrough.assign<{ input: string; sessionId: string }, any>({
       // Get Message History
-      history: async (input_, options) => {
+      history: async (_input, options) => {
         const history = await getHistory(
           options?.config.configurable.sessionId
         );
@@ -88,17 +68,19 @@ export default async function initAgent(
         return history;
       },
     })
+      // end::history[]
+      // tag::rephrase[]
       .assign({
         // Use History to rephrase the question
         rephrasedQuestion: (input: RephraseQuestionInput, config: any) =>
           rephraseQuestionChain.invoke(input, config),
       })
+      // end::rephrase[]
 
+      // tag::execute[]
       // Pass to the executor
       .assign({
         output: async (input, options) => {
-          console.log("before", options?.configurable.sessionId);
-
           const res = await executor.invoke(input, {
             configurable: { sessionId: options?.configurable.sessionId },
           });
@@ -106,6 +88,9 @@ export default async function initAgent(
           return res.output;
         },
       })
+      // end::execute[]
+      // tag::output[]
       .pick("output")
+    // end::output[]
   );
 }

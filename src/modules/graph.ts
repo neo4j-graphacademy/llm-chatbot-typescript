@@ -95,3 +95,17 @@ export async function write<T extends Record<string, any>>(
   return res.records.map((record) => record.toObject());
 }
 // end::write[]
+
+/**
+ * Close any connections to Neo4j initiated in this file.
+ *
+ * @returns {Promise<void>}
+ */
+export async function close(): Promise<void> {
+  if (graph) {
+    await graph.close();
+  }
+  if (driver) {
+    await driver.close();
+  }
+}

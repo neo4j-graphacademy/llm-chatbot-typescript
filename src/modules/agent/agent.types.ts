@@ -8,7 +8,6 @@ export interface ChatAgentInput {
 
 // tag::agenttoolinput[]
 export interface AgentToolInput {
-  sessionId: string;
   input: string;
   rephrasedQuestion: string;
 }
@@ -16,9 +15,11 @@ export interface AgentToolInput {
 
 // tag::schema[]
 export const AgentToolInputSchema = z.object({
-  input: z.string().describe("The original question"),
+  input: z.string().describe("The original input sent by the user"),
   rephrasedQuestion: z
     .string()
-    .describe("The rephrased question based on the conversation history"),
+    .describe(
+      "A rephrased version of the original question based on the conversation history"
+    ),
 });
 // end::schema[]

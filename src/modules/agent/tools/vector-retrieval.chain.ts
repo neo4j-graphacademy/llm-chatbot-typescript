@@ -33,7 +33,7 @@ const docsToJson = (documents: DocumentInterface[]) =>
 // end::docsToJson[]
 
 // tag::function[]
-export async function initVectorRetrievalChain(
+export default async function initVectorRetrievalChain(
   llm: BaseLanguageModel,
   embeddings: Embeddings
 ): Promise<Runnable<AgentToolInput, string>> {
@@ -95,6 +95,7 @@ export async function initVectorRetrievalChain(
         responseId: async (input: RetrievalChainThroughput, options) =>
           saveHistory(
             options?.config.configurable.sessionId,
+            "vector",
             input.input,
             input.rephrasedQuestion,
             input.output,

@@ -13,6 +13,7 @@ export interface GenerateAuthoritativeAnswerInput {
 }
 // end::interface[]
 
+// tag::function[]
 export default function initGenerateAuthoritativeAnswerChain(
   llm: BaseLanguageModel
 ): RunnableSequence<GenerateAuthoritativeAnswerInput, string> {
@@ -57,6 +58,7 @@ export default function initGenerateAuthoritativeAnswerChain(
   ]);
   // end::sequence[]
 }
+// end::function[]
 
 /**
  * How to use this chain in your application:

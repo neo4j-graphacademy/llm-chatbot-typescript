@@ -1,3 +1,4 @@
+import { Message } from "@/hooks/chat";
 import {
   FormEvent,
   KeyboardEventHandler,
@@ -5,9 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { AIMessage, HumanMessage } from "langchain/schema";
-
-type Message = AIMessage | HumanMessage;
 
 export default function Form({
   onSubmit,
@@ -16,6 +14,7 @@ export default function Form({
 }: {
   onSubmit: (message: string) => void;
   messages: Message[];
+  thinking: boolean;
   container: RefObject<HTMLDivElement>;
 }) {
   const input = useRef<HTMLTextAreaElement>(null);
@@ -33,10 +32,11 @@ export default function Form({
   };
 
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+    if (thinking) {
+      return;
+    }
     if (e.key === "ArrowUp") {
-      const lastHuman = messages
-        .reverse()
-        .find((m) => m._getType() === "human");
+      const lastHuman = messages.reverse().find((m) => m.role === "human");
 
       if (lastHuman) {
         setMessage(lastHuman.content as string);

@@ -32,62 +32,43 @@ export default async function initCypherEvaluationChain(
   // TODO: Create prompt template
   // const prompt = PromptTemplate.fromTemplate(...)
   const prompt = PromptTemplate.fromTemplate(`
-    Given the following schema, will the Cypher statement provided
-    return the correct information to answer the question.
+    You are an expert Neo4j Developer evaluating a Cypher statement written by an AI.
 
-    You must:
+    Check that the cypher statement provided below against the database schema to check that
+    the statement will answer the user's question.
+    Fix any errors where possible.
+
+    The query must:
     * Only use the nodes, relationships and properties mentioned in the schema.
-    * Attempt to correct the Cypher statement where possible.
-    * Check that node labels and relationship types exist.
-    * Check that a property exists for the node or relationship.
-    * Check the direction of a relationship between two nodes.  If it is in the wrong direction, correct it.
+    * Assign a variable to nodes or relationships when intending to access their properties.
+    * Use \`IS NOT NULL\` to check for property existence.
+    * Use the \`elementId()\` function to return the unique identifier for a node or relationship as \`_id\`.
+    * For movies, use the tmdbId property to return a source URL.
+      For example: \`'https://www.themoviedb.org/movie/'+ m.tmdbId AS source\`.
+    * For movie titles that begin with "The", move "the" to the end.
+      For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
+    * For the role a person played in a movie, use the role property on the ACTED_IN relationship.
+    * Limit the maximum number of results to 10.
+    * Respond with only a Cypher statement.  No preamble.
 
+    Respond with a JSON object with "cypher" and "errors" keys.
+      * "cypher" - the corrected cypher statement
+      * "corrected" - a boolean
+      * "errors" - A list of uncorrectable errors.  For example, if a label,
+          relationship type or property does not exist in the schema.
+          Provide a hint to the correct element where possible.
 
+    Fixable Example #1:
+    * cypher:
+        MATCH (a:Actor {{name: 'Emil Eifrem'}})-[:ACTED_IN]->(m:Movie)
+        RETURN a.name AS Actor, m.title AS Movie, m.tmdbId AS source,
+        elementId(m) AS _id, m.released AS ReleaseDate, r.role AS Role LIMIT 10
+    * errors: ["Variable \`r\` not defined (line 1, column 172 (offset: 171))"]
+    * response:
+        MATCH (a:Actor {{\name: 'Emil Eifrem'}})-[r:ACTED_IN]->(m:Movie)
+        RETURN a.name AS Actor, m.title AS Movie, m.tmdbId AS source,
+        elementId(m) AS _id, m.released AS ReleaseDate, r.role AS Role LIMIT 10
 
-    If the statement is correct, return the statement.
-    If the statement is incorrect, rewrite the statement.
-
-    When checking a node property for a null value, use \`prop IS NOT NULL\`.
-
-    Return a JSON object with keys for "cypher" and "errors".
-    - "cypher" - the corrected cypher statement
-    - "corrected" - a boolean
-    - "errors" - A list of uncorrectable errors.  For example, if a label,
-        relationship type or property does not exist in the schema.
-        Provide a hint to the correct element where possible.
-
-    Only include errors that cannot be corrected.
-
-    Example input: MATCH (p:Person)<-[:DRKT]-(m:Movie) RETURN p.personName AS name
-    Example output:
-    {{
-      "cypher" : "MATCH (p:Person)<-[:DRKT]-(m:Movie) RETURN p.personName AS name"
-      "corrected": "false",
-      "errors": [
-        "The relationship type DRKT does not exist in the schema.  Did you mean (:Person)-[:DIRECTED]->(:Movie)?",
-        "The property :Person.personName does not exist in the schema.  Use person.name",
-      ]
-    }}
-
-    Example input: "MATCH (p:Person)<-[:DIRECTED_BY]-(m:Movie) RETURN p.personName AS name"
-    Example output:
-    {{
-      "cypher" : "MATCH (p:Person)-[:DIRECTED]->(m:Movie) RETURN p.personName AS name"
-      "corrected": "true",
-      "errors": []
-    }}
-
-    Example input: "MATCH (p:Person)-[:DIRECTED]->(m:Movie) RETURN p.personName AS name"
-    Example output:
-    {{
-      "cypher" : "MATCH (p:Person)-[:DIRECTED]->(m:Movie) RETURN p.personName AS name"
-      "corrected": "true",
-      "errors": []
-    }}
-
-
-    Always return the Cypher statement on a single line.
-    Do not provide any preamble or markdown.
 
     Schema:
     {schema}

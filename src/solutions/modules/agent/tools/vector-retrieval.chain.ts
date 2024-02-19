@@ -33,7 +33,7 @@ const docsToJson = (documents: DocumentInterface[]) =>
 // end::docsToJson[]
 
 // tag::function[]
-export async function initVectorRetrievalChain(
+export default async function initVectorRetrievalChain(
   llm: BaseLanguageModel,
   embeddings: Embeddings
 ): Promise<Runnable<AgentToolInput, string>> {

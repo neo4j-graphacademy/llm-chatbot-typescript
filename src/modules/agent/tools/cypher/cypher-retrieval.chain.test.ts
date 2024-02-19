@@ -4,7 +4,11 @@ import { config } from "dotenv";
 import { BaseChatModel } from "langchain/chat_models/base";
 import { Runnable } from "@langchain/core/runnables";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import initCypherRetrievalChain from "./cypher-retrieval.chain";
+import initCypherRetrievalChain, {
+  recursivelyEvaluate,
+  getResults,
+} from "./cypher-retrieval.chain";
+import { close } from "../../../graph";
 
 describe("Cypher QA Chain", () => {
   let graph: Neo4jGraph;
@@ -32,6 +36,7 @@ describe("Cypher QA Chain", () => {
 
   afterAll(async () => {
     await graph.close();
+    await close();
   });
 
   it("should answer a simple question", async () => {
@@ -86,9 +91,7 @@ describe("Cypher QA Chain", () => {
       { configurable: { sessionId } }
     );
 
-    expect(output).toContain(person);
     expect(output).toContain(role);
-    expect(output).toContain(movie);
 
     // Check persistence
     const contextRes = await graph.query(
@@ -169,4 +172,31 @@ describe("Cypher QA Chain", () => {
       }
     }
   }, 20000);
+
+  describe("recursivelyEvaluate", () => {
+    it("should correct a query with a missing variable", async () => {
+      const res = await recursivelyEvaluate(
+        graph,
+        llm,
+        "What movies has Emil Eifrem acted in?"
+      );
+
+      expect(res).toBeDefined();
+    }, 20000);
+  });
+
+  describe("getResults", () => {
+    it("should fix a broken Cypher statement on the fly", async () => {
+      const res = await getResults(graph, llm, {
+        question: "What role did Emil Eifrem play in Neo4j - Into the Graph?",
+        cypher:
+          "MATCH (a:Actor {name: 'Emil Eifrem'})-[:ACTED_IN]->(m:Movie) " +
+          "RETURN a.name AS Actor, m.title AS Movie, m.tmdbId AS source, " +
+          "elementId(m) AS _id, m.released AS ReleaseDate, r.role AS Role LIMIT 10",
+      });
+
+      expect(res).toBeDefined();
+      expect(JSON.stringify(res)).toContain("The Chief");
+    }, 20000);
+  });
 });

@@ -3,15 +3,7 @@ import { config } from "dotenv";
 import { BaseChatModel } from "langchain/chat_models/base";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import initCypherEvaluationChain, {
-  CypherEvaluationChainInput,
-} from "./cypher-evaluation.chain";
-
-import {
-  validateSyntax,
-  validateSemantics,
-  lintCypherQuery,
-} from "@neo4j-cypher/language-support";
+import initCypherEvaluationChain from "./cypher-evaluation.chain";
 
 describe("Cypher Evaluation Chain", () => {
   let graph: Neo4jGraph;
@@ -142,4 +134,21 @@ describe("Cypher Evaluation Chain", () => {
     expect(updatedCypher).toEqual(cypher);
     expect(errors.length).toBe(0);
   }, 10000);
+
+  it("should keep variables in relationship", async () => {
+    const cypher =
+      "MATCH (a:Actor {name: 'Emil Eifrem'})-[r:ACTED_IN]->" +
+      "(m:Movie {title: 'Neo4j - Into the Graph'}) RETURN r.role AS Role";
+    const input = {
+      question: "What role did Emil Eifrem play in Neo4j - Into the Graph",
+      cypher,
+      schema: graph.getSchema(),
+      errors: [],
+    };
+
+    const { cypher: updatedCypher, errors } = await chain.invoke(input);
+
+    expect(updatedCypher).toEqual(cypher);
+    expect(errors.length).toBe(0);
+  });
 });

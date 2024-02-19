@@ -21,10 +21,7 @@ export interface RephraseQuestionInput {
 export default function initRephraseChain(llm: BaseChatModel) {
   // tag::prompt[]
   // Prompt template
-  const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate<
-    RephraseQuestionInput,
-    string
-  >(`
+  const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate(`
     Given the following conversation and a question,
     rephrase the follow-up question to be a standalone question
     that is syntactically complete and understandable by an LLM.

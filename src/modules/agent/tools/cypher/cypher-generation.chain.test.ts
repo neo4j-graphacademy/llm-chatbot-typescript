@@ -5,6 +5,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import initCypherGenerationChain from "./cypher-generation.chain";
 import { extractIds } from "../../../../utils";
+import { close } from "../../../graph";
 
 describe("Cypher Generation Chain", () => {
   let graph: Neo4jGraph;
@@ -32,6 +33,7 @@ describe("Cypher Generation Chain", () => {
 
   afterAll(async () => {
     await graph.close();
+    await close();
   });
 
   it("should generate a simple count query", async () => {

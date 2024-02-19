@@ -2,10 +2,11 @@ import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { config } from "dotenv";
 import { BaseChatModel } from "langchain/chat_models/base";
 import { Embeddings } from "langchain/embeddings/base";
-import { Runnable, RunnableSequence } from "@langchain/core/runnables";
-import { initVectorRetrievalChain } from "./vector-retrieval.chain";
+import { Runnable } from "@langchain/core/runnables";
+import initVectorRetrievalChain from "./vector-retrieval.chain";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import { AgentToolInput } from "../agent.types";
+import { close } from "../../graph";
 
 describe("Vector Retrieval Chain", () => {
   let graph: Neo4jGraph;
@@ -38,6 +39,7 @@ describe("Vector Retrieval Chain", () => {
 
   afterAll(async () => {
     await graph.close();
+    await close();
   });
 
   it("should provide a recommendation", async () => {

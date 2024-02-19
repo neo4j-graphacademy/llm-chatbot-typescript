@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { BaseLanguageModel } from "langchain/base_language";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 import { RunnablePassthrough } from "@langchain/core/runnables";
@@ -74,6 +75,55 @@ async function recursivelyEvaluate(
 }
 // end::recursive[]
 
+// tag::results[]
+/**
+ * Attempt to get the results, and if there is a syntax error in the Cypher statement,
+ * attempt to correct the errors.
+ *
+ * @param {Neo4jGraph}        graph  The graph instance to get the results from
+ * @param {BaseLanguageModel} llm    The LLM to evaluate the Cypher statement if anything goes wrong
+ * @param {string}            input  The input built up by the Cypher Retrieval Chain
+ * @returns {Promise<Record<string, any>[]>}
+ */
+export async function getResults(
+  graph: Neo4jGraph,
+  llm: BaseLanguageModel,
+  input: { question: string; cypher: string }
+): Promise<any | undefined> {
+  // TODO: catch Cypher errors and pass to the Cypher evaluation chain
+  // tag::resultvars[]
+  let results;
+  let retries = 0;
+  let cypher = input.cypher;
+
+  // Evaluation chain if an error is thrown by Neo4j
+  const evaluationChain = await initCypherEvaluationChain(llm);
+  // end::resultvars[]
+
+  // tag::resultloop[]
+  while (results === undefined && retries < 5) {
+    try {
+      results = await graph.query(cypher);
+      return results;
+    } catch (e: any) {
+      retries++;
+
+      const evaluation = await evaluationChain.invoke({
+        cypher,
+        question: input.question,
+        schema: graph.getSchema(),
+        errors: [e.message],
+      });
+
+      cypher = evaluation.cypher;
+    }
+  }
+
+  return results;
+  // end::resultloop[]
+}
+// end::results[]
+
 // tag::function[]
 export default async function initCypherRetrievalChain(
   llm: BaseLanguageModel,
@@ -95,7 +145,8 @@ export default async function initCypherRetrievalChain(
       // tag::getresults[]
       // Get results from database
       .assign({
-        results: (input: { cypher: string }) => graph.query(input.cypher, {}),
+        results: (input: { cypher: string; question: string }) =>
+          getResults(graph, llm, input),
       })
       // end::getresults[]
 

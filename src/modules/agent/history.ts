@@ -121,6 +121,7 @@ export async function getHistory(
  * Save a question and response to the database
  *
  * @param {string} sessionId
+ * @param {string} source
  * @param {string} input
  * @param {string} rephrasedQuestion
  * @param {string} output
@@ -130,21 +131,13 @@ export async function getHistory(
  */
 export async function saveHistory(
   sessionId: string,
+  source: string,
   input: string,
   rephrasedQuestion: string,
   output: string,
   ids: string[],
   cypher: string | null = null
 ): Promise<string> {
-  console.log("saveHistory", {
-    sessionId,
-    input,
-    output,
-    rephrasedQuestion,
-    cypher: cypher,
-    ids,
-  });
-
   // tag::savetx[]
   const res = await write<{ id: string }>(
     `
@@ -154,6 +147,7 @@ export async function saveHistory(
     CREATE (response:Response {
       id: randomUuid(),
       createdAt: datetime(),
+      source: $source,
       input: $input,
       output: $output,
       rephrasedQuestion: $rephrasedQuestion,
@@ -194,7 +188,7 @@ export async function saveHistory(
 
     RETURN DISTINCT response.id AS id
   `,
-    { sessionId, input, output, rephrasedQuestion, cypher: cypher, ids }
+    { sessionId, source, input, output, rephrasedQuestion, cypher: cypher, ids }
   );
   // end::savetx[]
 

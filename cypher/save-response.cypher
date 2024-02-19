@@ -4,6 +4,7 @@ MERGE (session:Session { id: $sessionId }) // <1>
 CREATE (response:Response {
   id: randomUuid(),
   createdAt: datetime(),
+  source: $source,
   input: $input,
   output: $output,
   rephrasedQuestion: $rephrasedQuestion,

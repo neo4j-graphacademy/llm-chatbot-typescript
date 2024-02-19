@@ -10,6 +10,7 @@ export interface GenerateAnswerInput {
 }
 // end::interface[]
 
+// tag::function[]
 export default function initGenerateAnswerChain(
   llm: BaseLanguageModel
 ): RunnableSequence<GenerateAnswerInput, string> {
@@ -39,6 +40,7 @@ export default function initGenerateAnswerChain(
   ]);
   // end::sequence[]
 }
+// end::function[]
 
 /**
  * How to use this chain in your application:

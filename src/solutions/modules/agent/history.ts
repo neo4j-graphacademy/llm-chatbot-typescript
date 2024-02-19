@@ -47,9 +47,9 @@ export async function getHistory(
   );
   // end::gettx[]
 
-  // tag::getreturn
+  // tag::getreturn[]
   return res;
-  // end::getreturn
+  // end::getreturn[]
 }
 // end::get[]
 
@@ -67,6 +67,7 @@ export async function getHistory(
  */
 export async function saveHistory(
   sessionId: string,
+  source: string,
   input: string,
   rephrasedQuestion: string,
   output: string,
@@ -82,6 +83,7 @@ export async function saveHistory(
     CREATE (response:Response {
       id: randomUuid(),
       createdAt: datetime(),
+      source: $source,
       input: $input,
       output: $output,
       rephrasedQuestion: $rephrasedQuestion,
@@ -93,14 +95,14 @@ export async function saveHistory(
     WITH session, response
 
     CALL {
-    WITH session, response
+      WITH session, response
 
-    // <3> Remove existing :LAST_RESPONSE relationship if it exists
-    MATCH (session)-[lrel:LAST_RESPONSE]->(last)
-    DELETE lrel
+      // <3> Remove existing :LAST_RESPONSE relationship if it exists
+      MATCH (session)-[lrel:LAST_RESPONSE]->(last)
+      DELETE lrel
 
-    // <4? Create :NEXT relationship
-    CREATE (last)-[:NEXT]->(response)
+      // <4? Create :NEXT relationship
+      CREATE (last)-[:NEXT]->(response)
     }
 
 
@@ -122,7 +124,7 @@ export async function saveHistory(
 
     RETURN DISTINCT response.id AS id
   `,
-    { sessionId, input, output, rephrasedQuestion, cypher: cypher, ids }
+    { sessionId, source, input, output, rephrasedQuestion, cypher: cypher, ids }
   );
   // end::savetx[]
 

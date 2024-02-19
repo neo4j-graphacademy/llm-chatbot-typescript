@@ -28,7 +28,7 @@ type CypherRetrievalThroughput = AgentToolInput & {
  * @param {string}            question  The rephrased question
  * @returns {string}
  */
-async function recursivelyEvaluate(
+export async function recursivelyEvaluate(
   graph: Neo4jGraph,
   llm: BaseLanguageModel,
   question: string
@@ -39,7 +39,7 @@ async function recursivelyEvaluate(
   // const evaluatorChain = ...
 
   // TODO: Generate Initial cypher
-  console.log({ question });
+  // let cypher = ...
 
   // TODO: Recursively evaluate the cypher until there are no errors
 
@@ -54,8 +54,6 @@ async function recursivelyEvaluate(
   let cypher = await generationChain.invoke(question);
   // end::initialcypher[]
 
-  console.log({ cypher });
-
   // tag::evaluateloop[]
   let errors = ["N/A"];
   let tries = 0;
@@ -63,18 +61,18 @@ async function recursivelyEvaluate(
   while (tries < 5 && errors.length > 0) {
     tries++;
 
-    // Evaluate Cypher
-    const evaluation = await evaluatorChain.invoke({
-      question,
-      schema: graph.getSchema(),
-      cypher,
-      errors,
-    });
+    try {
+      // Evaluate Cypher
+      const evaluation = await evaluatorChain.invoke({
+        question,
+        schema: graph.getSchema(),
+        cypher,
+        errors,
+      });
 
-    errors = evaluation.errors;
-    cypher = evaluation.cypher;
-
-    console.log({ cypher, errors });
+      errors = evaluation.errors;
+      cypher = evaluation.cypher;
+    } catch (e: unknown) {}
   }
   // end::evaluateloop[]
 
@@ -87,6 +85,55 @@ async function recursivelyEvaluate(
   // end::evaluatereturn[]
 }
 // end::recursive[]
+
+// tag::results[]
+/**
+ * Attempt to get the results, and if there is a syntax error in the Cypher statement,
+ * attempt to correct the errors.
+ *
+ * @param {Neo4jGraph}        graph  The graph instance to get the results from
+ * @param {BaseLanguageModel} llm    The LLM to evaluate the Cypher statement if anything goes wrong
+ * @param {string}            input  The input built up by the Cypher Retrieval Chain
+ * @returns {Promise<Record<string, any>[]>}
+ */
+export async function getResults(
+  graph: Neo4jGraph,
+  llm: BaseLanguageModel,
+  input: { question: string; cypher: string }
+): Promise<any | undefined> {
+  // TODO: catch Cypher errors and pass to the Cypher evaluation chain
+  // tag::resultvars[]
+  let results;
+  let retries = 0;
+  let cypher = input.cypher;
+
+  // Evaluation chain if an error is thrown by Neo4j
+  const evaluationChain = await initCypherEvaluationChain(llm);
+  // end::resultvars[]
+
+  // tag::resultloop[]
+  while (results === undefined && retries < 5) {
+    try {
+      results = await graph.query(cypher);
+      return results;
+    } catch (e: any) {
+      retries++;
+
+      const evaluation = await evaluationChain.invoke({
+        cypher,
+        question: input.question,
+        schema: graph.getSchema(),
+        errors: [e.message],
+      });
+
+      cypher = evaluation.cypher;
+    }
+  }
+
+  return results;
+  // end::resultloop[]
+}
+// end::results[]
 
 // tag::function[]
 export default async function initCypherRetrievalChain(
@@ -111,7 +158,8 @@ export default async function initCypherRetrievalChain(
       // tag::getresults[]
       // Get results from database
       .assign({
-        results: (input: { cypher: string }) => graph.query(input.cypher, {}),
+        results: (input: { cypher: string; question: string }) =>
+          getResults(graph, llm, input),
       })
       // end::getresults[]
 
@@ -144,10 +192,9 @@ export default async function initCypherRetrievalChain(
       // Save response to database
       .assign({
         responseId: async (input: CypherRetrievalThroughput, options) => {
-          console.log("mem", { input, options });
-
           saveHistory(
             options?.config.configurable.sessionId,
+            "cypher",
             input.input,
             input.rephrasedQuestion,
             input.output,

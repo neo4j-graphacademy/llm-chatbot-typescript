@@ -27,7 +27,7 @@ export default async function initCypherGenerationChain(
 
     You must:
     * Only use the nodes, relationships and properties mentioned in the schema.
-    * Use \`IS NOT NULL\` to check for property existence, and not the exists() function.
+    * When required, \`IS NOT NULL\` to check for property existence, and not the exists() function.
     * Use the \`elementId()\` function to return the unique identifier for a node or relationship as \`_id\`.
       For example:
       \`\`\`
@@ -36,25 +36,25 @@ export default async function initCypherGenerationChain(
       RETURN m.title AS title, elementId(m) AS _id, a.role AS role
       \`\`\`
     * Include extra information about the nodes that may help an LLM provide a more informative answer,
-      for example the release date, rating or
+      for example the release date, rating or budget.
     * For movies, use the tmdbId property to return a source URL.
       For example: \`'https://www.themoviedb.org/movie/'+ m.tmdbId AS source\`.
     * For movie titles that begin with "The", move "the" to the end.
       For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
     * Limit the maximum number of results to 10.
+    * Respond with only a Cypher statement.  No preamble.
 
-    Important:
-    * The "role" property exists on the ACTED_IN relationship.
-    * The "rating" property exists on the RATED relationship.
 
+    Example Question: What role did Tom Hanks play in Toy Story?
+    Example Cypher:
+    MATCH (a:Actor {{name: 'Tom Hanks'}})-[rel:ACTED_IN]->(m:Movie {{title: 'Toy Story'}})
+    RETURN a.name AS Actor, m.title AS Movie, elementId(m) AS _id, rel.role AS RoleInMovie
 
     Schema:
     {schema}
 
     Question:
     {question}
-
-    Respond with only the Cypher statement.
   `);
   // end::prompt[]
 
