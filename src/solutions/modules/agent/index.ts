@@ -5,7 +5,7 @@ import initAgent from "../../../modules/agent";
 import { HumanMessage } from "langchain/schema";
 import { initGraph } from "../graph";
 
-// tag::call[]
+// tag::function[]
 export async function call(input: string, sessionId: string): Promise<string> {
   // tag::model[]
   const llm = new ChatOpenAI({
@@ -16,7 +16,7 @@ export async function call(input: string, sessionId: string): Promise<string> {
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
   });
-  // tag::end[]
+  // end::embeddings[]
   // tag::graph[]
   // Get Graph Singleton
   const graph = await initGraph();
@@ -29,4 +29,4 @@ export async function call(input: string, sessionId: string): Promise<string> {
   return res;
   // end::call[]
 }
-// end::call[]
+// end::function[]
