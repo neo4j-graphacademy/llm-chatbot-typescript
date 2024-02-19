@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { Embeddings } from "@langchain/core/embeddings";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
 import { pull } from "langchain/hub";
 import initRephraseChain, {
   RephraseQuestionInput,
@@ -37,11 +37,29 @@ export default async function initAgent(
   const tools = await initTools(llm, embeddings, graph);
   // end::tools[]
 
+  /**
+
   // tag::prompt[]
-  const prompt = await pull<ChatPromptTemplate>(
-    "hwchase17/openai-functions-agent"
-  );
+ const prompt = await pull<ChatPromptTemplate>(
+     "hwchase17/openai-functions-agent"
+    );
   // end::prompt[]
+  */
+  // tag::scoped[]
+  const prompt = ChatPromptTemplate.fromTemplate(`
+    You are Ebert, a movie recommendation chatbot.
+    Your goal is to provide movie lovers with excellent recommendations
+    backed by data from Neo4j, the world's leading graph database.
+
+    Respond to any questions that don't relate to movies, actors or directors
+    with a joke about parrots, before asking them to ask another question
+    related to the movie industry.
+
+    Input: {input}
+
+    {agent_scratchpad}
+  `);
+  // end::scoped[]
 
   // tag::agent[]
   const agent = await createOpenAIFunctionsAgent({

@@ -31,7 +31,7 @@ export default async function initAgent(
   // end::prompt[]
 
   // tag::agent[]
-  // Create an OpenAI Functions agent
+  // Create an agent
   const agent = await createOpenAIFunctionsAgent({
     llm,
     tools,
@@ -53,9 +53,8 @@ export default async function initAgent(
   // end::rephrasechain[]
 
   // tag::history[]
-  // Return a Runnable
   return (
-    RunnablePassthrough.assign<{ input: string }, any>({
+    RunnablePassthrough.assign<{ input: string; sessionId: string }, any>({
       // Get Message History
       history: async (_input, options) => {
         const history = await getHistory(
@@ -76,19 +75,11 @@ export default async function initAgent(
 
       // tag::execute[]
       // Pass to the executor
-      .assign({
-        output: async (input, options) => {
-          const res = await executor.invoke(input, {
-            configurable: { sessionId: options?.configurable.sessionId },
-          });
-
-          return res.output;
-        },
-      })
+      .pipe(executor)
       // end::execute[]
       // tag::output[]
       .pick("output")
-    // end::output[]
   );
+  // end::output[]
 }
 // end::function[]
