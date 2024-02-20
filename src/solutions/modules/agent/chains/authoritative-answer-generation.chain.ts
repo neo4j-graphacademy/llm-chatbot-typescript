@@ -7,10 +7,10 @@ import {
 import { BaseLanguageModel } from "langchain/base_language";
 
 // tag::interface[]
-export interface GenerateAuthoritativeAnswerInput {
+export type GenerateAuthoritativeAnswerInput = {
   question: string;
   context: string | undefined;
-}
+};
 // end::interface[]
 
 export default function initGenerateAuthoritativeAnswerChain(
@@ -48,7 +48,7 @@ export default function initGenerateAuthoritativeAnswerChain(
   // tag::sequence[]
   return RunnableSequence.from<GenerateAuthoritativeAnswerInput, string>([
     RunnablePassthrough.assign({
-      context: ({ context }: { context: string | undefined }) =>
+      context: ({ context }) =>
         context == undefined || context === "" ? "I don't know" : context,
     }),
     answerQuestionPrompt,

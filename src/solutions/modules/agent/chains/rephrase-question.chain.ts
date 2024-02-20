@@ -9,25 +9,30 @@ import { BaseChatModel } from "langchain/chat_models/base";
 import { ChatbotResponse } from "../history";
 
 // tag::interface[]
-export interface RephraseQuestionInput {
+export type RephraseQuestionInput = {
   // The user's question
   input: string;
   // Conversation history of {input, output} from the database
   history: ChatbotResponse[];
-}
+};
 // end::interface[]
 
 // tag::function[]
 export default function initRephraseChain(llm: BaseChatModel) {
   // tag::prompt[]
   // Prompt template
-  const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate(`
+  const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate<
+    RephraseQuestionInput,
+    string
+  >(`
     Given the following conversation and a question,
-    rephrase the follow-up question to be a standalone question
-    that is syntactically complete and understandable by an LLM.
+    rephrase the follow-up question to be a standalone question about the
+    subject of the conversation history.
 
     If you do not have the required information required to construct
     a standalone question, ask for clarification.
+
+    Always include the subject of the history in the question.
 
     History:
     {history}
@@ -42,13 +47,17 @@ export default function initRephraseChain(llm: BaseChatModel) {
     // <1> Convert message history to a string
     // tag::assign[]
     RunnablePassthrough.assign({
-      history: ({ history }: Record<string, any>): string =>
-        history
+      history: ({ history }): string => {
+        if (history.length == 0) {
+          return "No history";
+        }
+        return history
           .map(
             (response: ChatbotResponse) =>
               `Human: ${response.input}\nAI: ${response.output}`
           )
-          .join("\n"),
+          .join("\n");
+      },
     }),
     // end::assign[]
     // <2> Use the input and formatted history to format the prompt

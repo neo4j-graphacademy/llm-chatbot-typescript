@@ -17,45 +17,44 @@ export default async function initCypherGenerationChain(
   const cypherPrompt = PromptTemplate.fromTemplate(`
     You are a Neo4j Developer translating user questions into Cypher to answer questions
     about movies and provide recommendations.
-    Convert the user's question based on the schema.
+    Convert the user's question into a Cypher statement based on the schema.
 
-    Instructions:
+    You must:
+    * Only use the nodes, relationships and properties mentioned in the schema.
+    * When required, \`IS NOT NULL\` to check for property existence, and not the exists() function.
+    * Use the \`elementId()\` function to return the unique identifier for a node or relationship as \`_id\`.
+      For example:
+      \`\`\`
+      MATCH (a:Person)-[:ACTED_IN]->(m:Movie)
+      WHERE a.name = 'Emil Eifrem'
+      RETURN m.title AS title, elementId(m) AS _id, a.role AS role
+      \`\`\`
+    * Include extra information about the nodes that may help an LLM provide a more informative answer,
+      for example the release date, rating or budget.
+    * For movies, use the tmdbId property to return a source URL.
+      For example: \`'https://www.themoviedb.org/movie/'+ m.tmdbId AS source\`.
+    * For movie titles that begin with "The", move "the" to the end.
+      For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
+    * Limit the maximum number of results to 10.
+    * Respond with only a Cypher statement.  No preamble.
 
-    Include extra information to help answer the question: for example, the roles that an actor
-    played in the movie, the release date and the average rating.
-    For movie titles that begin with "The", move "the" to the end.
-    For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
 
-    When you return a node, always use the elementId() function to return an  \`_id\` property.
-    For example:
-
-    \`\`\`
-    RETURN p.name AS name, elementId(p) AS _id
-    \`\`\`
-
-    Important: Use elementId(), never id() - the id() function has been deprecated.
-
-    When checking a node property for a null value, use \`prop IS NOT NULL\`.
-
-    Use only the provided relationship types and properties in the schema.
-    Do not use any labels, relationship types or properties that are not provided in the schema.
-
-    Limit the maximum number of results to 10.
+    Example Question: What role did Tom Hanks play in Toy Story?
+    Example Cypher:
+    MATCH (a:Actor {{name: 'Tom Hanks'}})-[rel:ACTED_IN]->(m:Movie {{title: 'Toy Story'}})
+    RETURN a.name AS Actor, m.title AS Movie, elementId(m) AS _id, rel.role AS RoleInMovie
 
     Schema:
     {schema}
 
     Question:
     {question}
-
-    Respond with only the Cypher statement.
   `);
   // end::prompt[]
 
-  // tag::startsequence[]
+  // tag::sequence[]
   // Create the runnable sequence
   return RunnableSequence.from<string, string>([
-    // end::startsequence[]
     // tag::assign[]
     {
       // Take the input and assign it to the question key
@@ -69,8 +68,7 @@ export default async function initCypherGenerationChain(
     llm,
     new StringOutputParser(),
     // end::rest[]
-    // tag::endsequence[]
   ]);
-  // end::endsequence[]
+  // end::sequence[]
 }
 // end::function[]

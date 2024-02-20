@@ -71,7 +71,6 @@ export default async function initVectorRetrievalChain(
       // end::mutatecontext[]
       // tag::answer[]
       .assign({
-        // Generate an answer to the question
         output: (input: RetrievalChainThroughput) =>
           answerChain.invoke({
             question: input.rephrasedQuestion,
@@ -80,11 +79,11 @@ export default async function initVectorRetrievalChain(
       })
       // end::answer[]
       // tag::save[]
-      // Save the response to the database
       .assign({
-        responseId: (input: RetrievalChainThroughput, options) =>
+        responseId: async (input: RetrievalChainThroughput, options) =>
           saveHistory(
             options?.config.configurable.sessionId,
+            "vector",
             input.input,
             input.rephrasedQuestion,
             input.output,
@@ -93,7 +92,6 @@ export default async function initVectorRetrievalChain(
       })
       // end::save[]
       // tag::output[]
-      // Return only the output
       .pick("output")
   );
   // end::output[]

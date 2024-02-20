@@ -8,23 +8,21 @@ import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 let driver: Driver;
 
 export async function initDriver(): Promise<Driver> {
-  if (driver) {
-    return driver;
+  // tag::create[]
+  if (!graph) {
+    // Create singleton and wait for connection to be verified
+    graph = await Neo4jGraph.initialize({
+      url: process.env.NEO4J_URI as string,
+      username: process.env.NEO4J_USERNAME as string,
+      password: process.env.NEO4J_PASSWORD as string,
+      database: process.env.NEO4J_DATABASE as string | undefined,
+    });
   }
+  // end::create[]
 
-  // Create singleton
-  driver = neo4j.driver(
-    process.env.NEO4J_URI as string,
-    neo4j.auth.basic(
-      process.env.NEO4J_USERNAME as string,
-      process.env.NEO4J_PASSWORD as string
-    )
-  );
-
-  // Wait for connection to be verified
-  await driver.verifyConnectivity();
-
-  return driver;
+  // tag::return[]
+  return graph;
+  // end::return[]
 }
 // end::driver[]
 

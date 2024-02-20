@@ -1,4 +1,4 @@
-Use only the following context to answer the following question.
+Use the following context to answer the following question.
 The context is provided by an authoritative source, you must never doubt
 it or attempt to use your pre-trained knowledge to correct the answer.
 
@@ -11,7 +11,8 @@ Question: Who played Woody in Toy Story?
 Context: ['role': 'Woody', 'actor': 'Tom Hanks']
 Response: Tom Hanks played Woody in Toy Story.
 
-If no context is provided, just say that you don't know, don't try to make up an answer.
+If no context is provided, say that you don't know,
+don't try to make up an answer, and do not fall back on your internal knowledge.
 If no context is provided you may also ask for clarification.
 
 Include links and sources where possible.

@@ -5,8 +5,8 @@ import { RunnablePassthrough } from "@langchain/core/runnables";
 import initCypherGenerationChain from "./cypher-generation.chain";
 import initCypherEvaluationChain from "./cypher-evaluation.chain";
 import { saveHistory } from "../../history";
-import { AgentToolInput } from "../../agent.types";
-import { extractIds } from "../../../../utils";
+import { AgentToolInput } from "../../../../../modules/agent/agent.types";
+import { extractIds } from "../../../../../utils";
 import initGenerateAuthoritativeAnswerChain from "../../chains/authoritative-answer-generation.chain";
 
 // tag::input[]
@@ -46,22 +46,24 @@ async function recursivelyEvaluate(
   // end::initialcypher[]
 
   // tag::evaluateloop[]
-  let errors = [null];
+  let errors = ["N/A"];
   let tries = 0;
 
   while (tries < 5 && errors.length > 0) {
     tries++;
 
-    // Evaluate Cypher
-    const evaluation = await evaluatorChain.invoke({
-      question,
-      schema: graph.getSchema(),
-      cypher,
-      errors,
-    });
+    try {
+      // Evaluate Cypher
+      const evaluation = await evaluatorChain.invoke({
+        question,
+        schema: graph.getSchema(),
+        cypher,
+        errors,
+      });
 
-    errors = evaluation.errors;
-    cypher = evaluation.cypher;
+      errors = evaluation.errors;
+      cypher = evaluation.cypher;
+    } catch (e: unknown) {}
   }
   // end::evaluateloop[]
 
@@ -135,11 +137,12 @@ export default async function initCypherRetrievalChain(
 
   // tag::cypher[]
   return (
-    RunnablePassthrough.assign({
+    RunnablePassthrough
       // Generate and evaluate the Cypher statement
-      cypher: ({ rephrasedQuestion }: { rephrasedQuestion: string }) =>
-        recursivelyEvaluate(graph, llm, rephrasedQuestion),
-    })
+      .assign({
+        cypher: (input: { rephrasedQuestion: string }) =>
+          recursivelyEvaluate(graph, llm, input.rephrasedQuestion),
+      })
       // end::cypher[]
 
       // tag::getresults[]
@@ -178,15 +181,17 @@ export default async function initCypherRetrievalChain(
       // tag::save[]
       // Save response to database
       .assign({
-        responseId: async (input: CypherRetrievalThroughput, options) =>
+        responseId: async (input: CypherRetrievalThroughput, options) => {
           saveHistory(
             options?.config.configurable.sessionId,
+            "cypher",
             input.input,
             input.rephrasedQuestion,
             input.output,
             input.ids,
             input.cypher
-          ),
+          );
+        },
       })
       // end::save[]
       // tag::output[]

@@ -1,15 +1,15 @@
 import { read, write } from "../../../modules/graph";
 
-interface UnpersistedChatbotResponse {
+type UnpersistedChatbotResponse = {
   input: string;
   rephrasedQuestion: string;
   output: string;
   cypher: string | undefined;
-}
+};
 
-export interface ChatbotResponse extends UnpersistedChatbotResponse {
+export type ChatbotResponse = UnpersistedChatbotResponse & {
   id: string;
-}
+};
 
 // tag::clear[]
 export async function clearHistory(sessionId: string): Promise<void> {
@@ -47,9 +47,9 @@ export async function getHistory(
   );
   // end::gettx[]
 
-  // tag::getreturn[]
+  // tag::getreturn
   return res;
-  // end::getreturn[]
+  // end::getreturn
 }
 // end::get[]
 
@@ -58,6 +58,7 @@ export async function getHistory(
  * Save a question and response to the database
  *
  * @param {string} sessionId
+ * @param {string} source
  * @param {string} input
  * @param {string} rephrasedQuestion
  * @param {string} output
@@ -95,7 +96,7 @@ export async function saveHistory(
     WITH session, response
 
     CALL {
-      WITH session, response
+    WITH session, response
 
       // <3> Remove existing :LAST_RESPONSE relationship if it exists
       MATCH (session)-[lrel:LAST_RESPONSE]->(last)

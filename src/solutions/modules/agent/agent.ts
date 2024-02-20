@@ -19,7 +19,6 @@ export default async function initAgent(
   graph: Neo4jGraph
 ) {
   // tag::tools[]
-  // Initiate tools
   const tools = await initTools(llm, embeddings, graph);
   // end::tools[]
 
@@ -48,7 +47,6 @@ export default async function initAgent(
   // end::scoped[]
 
   // tag::agent[]
-  // Create an agent
   const agent = await createOpenAIFunctionsAgent({
     llm,
     tools,
@@ -57,7 +55,6 @@ export default async function initAgent(
   // end::agent[]
 
   // tag::executor[]
-  // Create an agent executor
   const executor = new AgentExecutor({
     agent,
     tools,
@@ -65,7 +62,6 @@ export default async function initAgent(
   // end::executor[]
 
   // tag::rephrasechain[]
-  // Create a rephrase question chain
   const rephraseQuestionChain = await initRephraseChain(llm);
   // end::rephrasechain[]
 

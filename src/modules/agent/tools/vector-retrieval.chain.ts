@@ -39,73 +39,11 @@ export default async function initVectorRetrievalChain(
 ): Promise<Runnable<AgentToolInput, string>> {
   // TODO: Create vector store instance
   // const vectorStore = ...
-
   // TODO: Initialize a retriever wrapper around the vector store
   // const vectorStoreRetriever = ...
-
   // TODO: Initialize Answer chain
   // const answerChain = ...
-
   // TODO: Return chain
   // return RunnablePassthrough.assign( ... )
-
-  // tag::vectorstore[]
-  //  Create vector store instance
-  const vectorStore = await initVectorStore(embeddings);
-  // end::vectorstore[]
-
-  // tag::retriever[]
-  // Initialize a retriever wrapper around the vector store
-  const vectorStoreRetriever = vectorStore.asRetriever(5);
-  // end::retriever[]
-
-  // tag::answerchain[]
-  // Initialize  Answer Chain
-  const answerChain = initGenerateAnswerChain(llm);
-  // end::answerchain[]
-
-  // tag::getcontext[]
-  // Get the rephrased question and generate context
-  return (
-    RunnablePassthrough.assign({
-      documents: new RunnablePick("rephrasedQuestion").pipe(
-        vectorStoreRetriever
-      ),
-    })
-      // end::getcontext[]
-      // tag::mutatecontext[]
-      .assign({
-        // Extract the IDs
-        ids: new RunnablePick("documents").pipe(extractDocumentIds),
-        // convert documents to string
-        context: new RunnablePick("documents").pipe(docsToJson),
-      })
-      // end::mutatecontext[]
-      // tag::answer[]
-      .assign({
-        output: (input: RetrievalChainThroughput) =>
-          answerChain.invoke({
-            question: input.rephrasedQuestion,
-            context: input.context,
-          }),
-      })
-      // end::answer[]
-      // tag::save[]
-      .assign({
-        responseId: async (input: RetrievalChainThroughput, options) =>
-          saveHistory(
-            options?.config.configurable.sessionId,
-            "vector",
-            input.input,
-            input.rephrasedQuestion,
-            input.output,
-            input.ids
-          ),
-      })
-      // end::save[]
-      // tag::output[]
-      .pick("output")
-  );
-  // end::output[]
 }
 // end::function[]
