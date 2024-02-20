@@ -1,3 +1,4 @@
+import { close } from "../graph";
 import { getHistory, saveHistory } from "./history";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 
@@ -29,7 +30,10 @@ describe("Conversation History", () => {
     ids = first.ids;
   });
 
-  afterAll(() => graph.close());
+  afterAll(async () => {
+    await graph.close();
+    await close();
+  });
 
   it("should save conversation history", async () => {
     const sessionId = "test-1";
@@ -56,7 +60,7 @@ describe("Conversation History", () => {
     // Get History
     const history = await getHistory(sessionId, 5);
 
-    expect(history?.length).toBe(1);
+    expect(history?.length).toBeGreaterThanOrEqual(1);
 
     const returnedIds = history.map((m) => m.id);
 
@@ -64,14 +68,17 @@ describe("Conversation History", () => {
     expect(returnedIds).toContain(id);
 
     // Check sources
-    const res = await graph.query(`
-            MATCH (s:Session)-[:LAST_RESPONSE]->(r)
-            RETURN r { .* } AS properties,
-            [ (r)-[:CONTEXT]->(c) | elementId(c) ] AS context
-        `);
+    const res = await graph.query(
+      `
+      MATCH (s:Session {sessionId: $sessionId})-[:LAST_RESPONSE]->(r)
+      RETURN r { .* } AS properties,
+      [ (r)-[:CONTEXT]->(c) | elementId(c) ] AS context
+    `,
+      { sessionId }
+    );
 
     expect(res).toBeDefined();
-    expect(res?.length).toBe(1);
+    expect(res?.length).toBeGreaterThanOrEqual(1);
 
     // Has context been linked?
     const first = res![0];

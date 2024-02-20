@@ -47,9 +47,9 @@ export async function getHistory(
   );
   // end::gettx[]
 
-  // tag::getreturn
+  // tag::getreturn[]
   return res;
-  // end::getreturn
+  // end::getreturn[]
 }
 // end::get[]
 

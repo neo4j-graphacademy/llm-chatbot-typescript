@@ -53,8 +53,10 @@ export default async function initCypherGenerationChain(
   // end::prompt[]
 
   // tag::sequence[]
+  // tag::startsequence[]
   // Create the runnable sequence
   return RunnableSequence.from<string, string>([
+    // end::startsequence[]
     // tag::assign[]
     {
       // Take the input and assign it to the question key
@@ -68,7 +70,9 @@ export default async function initCypherGenerationChain(
     llm,
     new StringOutputParser(),
     // end::rest[]
+    // tag::endsequence[]
   ]);
+  // end::endsequence[]
   // end::sequence[]
 }
 // end::function[]
