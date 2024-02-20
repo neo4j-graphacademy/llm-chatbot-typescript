@@ -6,7 +6,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-describe("Answer Generation Chain", () => {
+describe("Speculative Answer Generation Chain", () => {
   let llm: BaseChatModel;
   let chain: RunnableSequence;
   let evalChain: RunnableSequence<any, any>;
