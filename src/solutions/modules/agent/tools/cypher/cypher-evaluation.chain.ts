@@ -108,5 +108,6 @@ export default async function initCypherEvaluationChain(
     new JsonOutputParser<CypherEvaluationChainOutput>(),
     // end::rest[]
   ]);
+  // end::runnable[]
 }
 // end::function[]

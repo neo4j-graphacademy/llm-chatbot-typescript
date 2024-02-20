@@ -92,7 +92,6 @@ export async function getResults(
   llm: BaseLanguageModel,
   input: { question: string; cypher: string }
 ): Promise<any | undefined> {
-  // TODO: catch Cypher errors and pass to the Cypher evaluation chain
   // tag::resultvars[]
   let results;
   let retries = 0;

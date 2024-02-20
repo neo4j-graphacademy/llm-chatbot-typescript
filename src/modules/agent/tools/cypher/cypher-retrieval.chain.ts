@@ -75,10 +75,6 @@ export default async function initCypherRetrievalChain(
 ) {
   // TODO: initiate answer chain
   // const answerGeneration = ...
-  // tag::answerchain[]
-  const answerGeneration = await initGenerateAuthoritativeAnswerChain(llm);
-  // end::answerchain[]
-
   // TODO: return RunnablePassthrough
 }
 // end::function[]

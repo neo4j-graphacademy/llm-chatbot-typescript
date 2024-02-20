@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "DOTENV_CONFIG_PATH=./.env.local jest --detectOpenHandles",
+    "test": "DOTENV_CONFIG_PATH=./.env.local jest",
     "test:watch": "DOTENV_CONFIG_PATH=./.env.local jest --watchAll --detectOpenHandles"
   },
   "dependencies": {

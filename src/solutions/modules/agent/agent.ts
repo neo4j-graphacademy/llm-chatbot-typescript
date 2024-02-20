@@ -12,6 +12,29 @@ import { RunnablePassthrough } from "@langchain/core/runnables";
 import { getHistory } from "./history";
 import initTools from "./tools";
 
+/**
+ * To restrict the scope of the agent, you can issue specific instructions
+ * in the prompt.
+ *
+ * The {agent_scratchpad} placeholder is used by the prompt to store any
+ * _thinking_ that the agent has performed while selecting the appropriate tool
+ */
+// tag::scoped[]
+const prompt = ChatPromptTemplate.fromTemplate(`
+You are Ebert, a movie recommendation chatbot.
+Your goal is to provide movie lovers with excellent recommendations
+backed by data from Neo4j, the world's leading graph database.
+
+Respond to any questions that don't relate to movies, actors or directors
+with a joke about parrots, before asking them to ask another question
+related to the movie industry.
+
+Input: {input}
+
+{agent_scratchpad}
+`);
+// end::scoped[]
+
 // tag::function[]
 export default async function initAgent(
   llm: BaseChatModel,
@@ -22,29 +45,11 @@ export default async function initAgent(
   const tools = await initTools(llm, embeddings, graph);
   // end::tools[]
 
-  /** Pre-written prompt from LangChain hub
   // tag::prompt[]
   const prompt = await pull<ChatPromptTemplate>(
-     "hwchase17/openai-functions-agent"
-    );
+    "hwchase17/openai-functions-agent"
+  );
   // end::prompt[]
-  */
-
-  // tag::scoped[]
-  const prompt = ChatPromptTemplate.fromTemplate(`
-    You are Ebert, a movie recommendation chatbot.
-    Your goal is to provide movie lovers with excellent recommendations
-    backed by data from Neo4j, the world's leading graph database.
-
-    Respond to any questions that don't relate to movies, actors or directors
-    with a joke about parrots, before asking them to ask another question
-    related to the movie industry.
-
-    Input: {input}
-
-    {agent_scratchpad}
-  `);
-  // end::scoped[]
 
   // tag::agent[]
   const agent = await createOpenAIFunctionsAgent({
