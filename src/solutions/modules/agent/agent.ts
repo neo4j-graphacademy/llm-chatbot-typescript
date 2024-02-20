@@ -63,6 +63,7 @@ export default async function initAgent(
   const executor = new AgentExecutor({
     agent,
     tools,
+    verbose: true, // Verbose output logs the agents _thinking_
   });
   // end::executor[]
 
