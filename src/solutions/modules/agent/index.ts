@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
-import initAgent from "../../../modules/agent";
+import initAgent from "../../../modules/agent/agent";
 import { HumanMessage } from "langchain/schema";
 import { initGraph } from "../graph";
 
