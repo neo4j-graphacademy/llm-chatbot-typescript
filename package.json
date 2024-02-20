@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "DOTENV_CONFIG_PATH=./.env.local jest",
-    "test:watch": "DOTENV_CONFIG_PATH=./.env.local jest --watchAll --detectOpenHandles"
+    "test": "cross-env DOTENV_CONFIG_PATH=./.env.local jest",
+    "test:watch": "cross-env DOTENV_CONFIG_PATH=./.env.local jest --watchAll --detectOpenHandles"
   },
   "dependencies": {
     "@babel/preset-env": "^7.23.8",
@@ -16,6 +16,7 @@
     "@langchain/core": "^0.1.30",
     "@langchain/openai": "^0.0.11",
     "@neo4j-cypher/language-support": "^2.0.0-next.3",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.0",
     "iron-session": "^8.0.1",
     "langchain": "^0.1.20",
