@@ -33,6 +33,7 @@ describe("Conversation History", () => {
 
   it("should save conversation history", async () => {
     const sessionId = "test-1";
+    const source = "cypher";
     const input = "Who directed The Matrix?";
     const rephrasedQuestion = "Director of The Matrix";
     const output = "The Matrix was directed by The Wachowskis";
@@ -42,6 +43,7 @@ describe("Conversation History", () => {
     // Save message
     const id = await saveHistory(
       sessionId,
+      source,
       input,
       rephrasedQuestion,
       output,
@@ -75,6 +77,7 @@ describe("Conversation History", () => {
     const first = res![0];
 
     expect(first.properties.id).toEqual(id);
+    expect(first.properties.source).toEqual(source);
     expect(first.properties.input).toEqual(input);
     expect(first.properties.rephrasedQuestion).toEqual(rephrasedQuestion);
     expect(first.properties.cypher).toEqual(cypher);
@@ -88,15 +91,16 @@ describe("Conversation History", () => {
 
   it("should save a chain of responses", async () => {
     const sessionId = "test-3";
+    const source = "retriever";
     const firstInput = "Who directed Toy Story?";
     const secondInput = "Who acted in it?";
     const thirdInput = "What else have the acted in together?";
 
     // Save message
     const messages = [
-      await saveHistory(sessionId, firstInput, "", "", []),
-      await saveHistory(sessionId, secondInput, "", "", []),
-      await saveHistory(sessionId, thirdInput, "", "", []),
+      await saveHistory(sessionId, source, firstInput, "", "", []),
+      await saveHistory(sessionId, source, secondInput, "", "", []),
+      await saveHistory(sessionId, source, thirdInput, "", "", []),
     ];
 
     for (const message of messages) {
