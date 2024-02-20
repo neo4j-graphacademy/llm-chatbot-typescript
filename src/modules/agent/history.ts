@@ -40,6 +40,7 @@ export async function getHistory(
  * Save a question and response to the database
  *
  * @param {string} sessionId
+ * @param {string} source
  * @param {string} input
  * @param {string} rephrasedQuestion
  * @param {string} output
@@ -49,6 +50,7 @@ export async function getHistory(
  */
 export async function saveHistory(
   sessionId: string,
+  source: string,
   input: string,
   rephrasedQuestion: string,
   output: string,
