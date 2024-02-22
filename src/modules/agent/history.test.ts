@@ -70,10 +70,10 @@ describe("Conversation History", () => {
     // Check sources
     const res = await graph.query(
       `
-      MATCH (s:Session {sessionId: $sessionId})-[:LAST_RESPONSE]->(r)
-      RETURN r { .* } AS properties,
-      [ (r)-[:CONTEXT]->(c) | elementId(c) ] AS context
-    `,
+        MATCH (s:Session {id: $sessionId})-[:LAST_RESPONSE]->(r)
+        RETURN r { .* } AS properties,
+        [ (r)-[:CONTEXT]->(c) | elementId(c) ] AS context
+      `,
       { sessionId }
     );
 
