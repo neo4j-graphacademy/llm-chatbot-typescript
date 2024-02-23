@@ -9,7 +9,7 @@ import { BaseChatModel } from "langchain/chat_models/base";
 import { ChatbotResponse } from "../history";
 
 // tag::interface[]
-export interface RephraseQuestionInput {
+export type RephraseQuestionInput = {
   // The user's question
   input: string;
   // Conversation history of {input, output} from the database
