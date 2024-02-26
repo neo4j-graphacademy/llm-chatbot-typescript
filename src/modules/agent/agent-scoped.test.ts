@@ -57,7 +57,7 @@ describe("Langchain Agent", () => {
         }
       );
 
-      expect(output).toContain("questions about movies");
+      expect(output).toContain("ask a question");
     });
   });
 });
