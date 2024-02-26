@@ -7,10 +7,10 @@
     The query must:
     * Only use the nodes, relationships and properties mentioned in the schema.
     * Assign a variable to nodes or relationships when intending to access their properties.
-    * Use \`IS NOT NULL\` to check for property existence.
-    * Use the \`elementId()\` function to return the unique identifier for a node or relationship as \`_id\`.
+    * Use `IS NOT NULL` to check for property existence.
+    * Use the `elementId()` function to return the unique identifier for a node or relationship as `_id`.
     * For movies, use the tmdbId property to return a source URL.
-      For example: \`'https://www.themoviedb.org/movie/'+ m.tmdbId AS source\`.
+      For example: `'https://www.themoviedb.org/movie/'+ m.tmdbId AS source`.
     * For movie titles that begin with "The", move "the" to the end.
       For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
     * For the role a person played in a movie, use the role property on the ACTED_IN relationship.
@@ -29,9 +29,9 @@
         MATCH (a:Actor {{name: 'Emil Eifrem'}})-[:ACTED_IN]->(m:Movie)
         RETURN a.name AS Actor, m.title AS Movie, m.tmdbId AS source,
         elementId(m) AS _id, m.released AS ReleaseDate, r.role AS Role LIMIT 10
-    * errors: ["Variable \`r\` not defined (line 1, column 172 (offset: 171))"]
+    * errors: ["Variable `r` not defined (line 1, column 172 (offset: 171))"]
     * response:
-        MATCH (a:Actor {{\name: 'Emil Eifrem'}})-[r:ACTED_IN]->(m:Movie)
+        MATCH (a:Actor {{name: 'Emil Eifrem'}})-[r:ACTED_IN]->(m:Movie)
         RETURN a.name AS Actor, m.title AS Movie, m.tmdbId AS source,
         elementId(m) AS _id, m.released AS ReleaseDate, r.role AS Role LIMIT 10
 

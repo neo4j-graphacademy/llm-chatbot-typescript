@@ -4,18 +4,18 @@ Convert the user's question into a Cypher statement based on the schema.
 
 You must:
 * Only use the nodes, relationships and properties mentioned in the schema.
-* When required, \`IS NOT NULL\` to check for property existence, and not the exists() function.
-* Use the \`elementId()\` function to return the unique identifier for a node or relationship as \`_id\`.
+* When required, `IS NOT NULL` to check for property existence, and not the exists() function.
+* Use the `elementId()` function to return the unique identifier for a node or relationship as `_id`.
     For example:
-    \`\`\`
+    ```
     MATCH (a:Person)-[:ACTED_IN]->(m:Movie)
     WHERE a.name = 'Emil Eifrem'
     RETURN m.title AS title, elementId(m) AS _id, a.role AS role
-    \`\`\`
+    ```
 * Include extra information about the nodes that may help an LLM provide a more informative answer,
     for example the release date, rating or budget.
 * For movies, use the tmdbId property to return a source URL.
-    For example: \`'https://www.themoviedb.org/movie/'+ m.tmdbId AS source\`.
+    For example: `'https://www.themoviedb.org/movie/'+ m.tmdbId AS source`.
 * For movie titles that begin with "The", move "the" to the end.
     For example "The 39 Steps" becomes "39 Steps, The" or "the matrix" becomes "Matrix, The".
 * Limit the maximum number of results to 10.
