@@ -1,32 +1,6 @@
-import neo4j, { Driver } from "neo4j-driver";
 // tag::import[]
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 // end::import[]
-
-// tag::driver[]
-// A singleton instance of Neo4j that can be used across the app
-let driver: Driver;
-
-export async function initDriver(): Promise<Driver> {
-  if (driver) {
-    return driver;
-  }
-
-  // Create singleton
-  driver = neo4j.driver(
-    process.env.NEO4J_URI as string,
-    neo4j.auth.basic(
-      process.env.NEO4J_USERNAME as string,
-      process.env.NEO4J_PASSWORD as string
-    )
-  );
-
-  // Wait for connection to be verified
-  await driver.verifyConnectivity();
-
-  return driver;
-}
-// end::driver[]
 
 // tag::graph[]
 // <1> The singleton instance
@@ -56,43 +30,3 @@ export async function initGraph(): Promise<Neo4jGraph> {
   // end::return[]
 }
 // end::graph[]
-
-// tag::read[]
-/**
- * Execute a Cypher statement in a read transaction
- *
- * @param {string} cypher               The cypher statement
- * @param {Record<string, any>} params  Parameters
- * @returns {Record<string, any>[]}
- */
-export async function read<T extends Record<string, any>>(
-  cypher: string,
-  params: Record<string, any>
-): Promise<T[]> {
-  const driver = await initDriver();
-  const session = driver.session();
-  const res = await session.executeRead((tx) => tx.run<T>(cypher, params));
-  await session.close();
-  return res.records.map((record) => record.toObject());
-}
-// end::read[]
-
-// tag::write[]
-/**
- * Execute a Cypher statement in a write transaction
- *
- * @param {string} cypher               The cypher statement
- * @param {Record<string, any>} params  Parameters
- * @returns {Record<string, any>[]}
- */
-export async function write<T extends Record<string, any>>(
-  cypher: string,
-  params: Record<string, any>
-): Promise<T[]> {
-  const driver = await initDriver();
-  const session = driver.session();
-  const res = await session.executeWrite((tx) => tx.run<T>(cypher, params));
-  await session.close();
-  return res.records.map((record) => record.toObject());
-}
-// end::write[]

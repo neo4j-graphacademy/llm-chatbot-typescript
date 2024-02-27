@@ -1,4 +1,4 @@
-import { read, write } from "../graph";
+import { initGraph } from "../graph";
 
 type UnpersistedChatbotResponse = {
   input: string;
@@ -13,12 +13,14 @@ export type ChatbotResponse = UnpersistedChatbotResponse & {
 
 // tag::clear[]
 export async function clearHistory(sessionId: string): Promise<void> {
-  await write(
+  const graph = await initGraph();
+  await graph.query(
     `
     MATCH (s:Session {id: $sessionId})-[:HAS_RESPONSE]->(r)
     DETACH DELETE r
   `,
-    { sessionId }
+    { sessionId },
+    "WRITE"
   );
 }
 // end::clear[]
@@ -30,7 +32,8 @@ export async function getHistory(
 ): Promise<ChatbotResponse[]> {
   // TODO: Execute the Cypher statement from /cypher/get-history.cypher in a read transaction
   // TODO: Use string templating to make the limit dynamic: 0..${limit}
-  // const res = await read<PersistedChatbotResponse>(cypher, { sessionId })
+  // const graph = await initGraph()
+  // const res = await graph.query<PersistedChatbotResponse>(cypher, { sessionId }, "READ")
   // return res
 }
 // end::get[]
@@ -58,7 +61,8 @@ export async function saveHistory(
   cypher: string | null = null
 ): Promise<string> {
   // TODO: Execute the Cypher statement from /cypher/save-response.cypher in a write transaction
-  // const res = await write<{id: string}>(cypher, { sessionId, input, output, rephrasedQuestion, cypher: cypher, ids })
+  // const graph = await initGraph()
+  // const res = await graph.query<{id: string}>(cypher, params, "WRITE")
   // return res[0].id
 }
 // end::save[]

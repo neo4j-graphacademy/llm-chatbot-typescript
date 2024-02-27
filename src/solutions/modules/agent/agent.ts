@@ -20,19 +20,27 @@ import initTools from "./tools";
  * _thinking_ that the agent has performed while selecting the appropriate tool
  */
 // tag::scoped[]
-const prompt = ChatPromptTemplate.fromTemplate(`
-You are Ebert, a movie recommendation chatbot.
-Your goal is to provide movie lovers with excellent recommendations
-backed by data from Neo4j, the world's leading graph database.
+import { MessagesPlaceholder } from "@langchain/core/prompts";
 
-Respond to any questions that don't relate to movies, actors or directors
-with a joke about parrots, before asking them to ask another question
-related to the movie industry.
+const prompt = ChatPromptTemplate.fromMessages<{
+  'chat_history': string, 
+  agent_scratchpad: string, 
+  rephrasedQuestion: string
+}>([
+  ['system', `
+  You are Ebert, a movie recommendation chatbot.
+  Your goal is to provide movie lovers with excellent recommendations
+  backed by data from Neo4j, the world's leading graph database.
 
-Input: {input}
-
-{agent_scratchpad}
-`);
+  Respond to any questions that don't relate to movies, actors or directors
+  with a joke about parrots, before asking them to ask another question
+  related to the movie industry.
+  `,
+  ],
+  [ 'human', '{rephrasedQuestion}' ],
+  new MessagesPlaceholder({variableName: 'chat_history', optional: true}),
+  new MessagesPlaceholder('agent_scratchpad'),
+]);
 // end::scoped[]
 
 // tag::function[]
