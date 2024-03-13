@@ -1,5 +1,4 @@
-import { Driver } from "neo4j-driver";
-import { initDriver, initGraph } from "./graph";
+import { initGraph } from "./graph";
 import { Neo4jGraph } from "@langchain/community/graphs/neo4j_graph";
 
 describe("Neo4j Graph", () => {
@@ -7,15 +6,6 @@ describe("Neo4j Graph", () => {
     expect(process.env.NEO4J_URI).toBeDefined();
     expect(process.env.NEO4J_USERNAME).toBeDefined();
     expect(process.env.NEO4J_PASSWORD).toBeDefined();
-  });
-
-  describe("initDriver", () => {
-    it("should instantiate Driver", async () => {
-      const driver = await initDriver();
-      expect(driver).toBeInstanceOf(Driver);
-
-      await driver.close();
-    });
   });
 
   describe("initGraph", () => {
