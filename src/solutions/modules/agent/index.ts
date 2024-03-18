@@ -10,6 +10,10 @@ export async function call(input: string, sessionId: string): Promise<string> {
   // tag::model[]
   const llm = new ChatOpenAI({
     openAIApiKey: process.env.OPENAI_API_KEY,
+    // Note: only provide a baseURL when using the GraphAcademy Proxy
+    configuration: {
+      baseURL: process.env.OPENAI_API_BASE,
+    },
   });
   // end::model[]
   // tag::embeddings[]

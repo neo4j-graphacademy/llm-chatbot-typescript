@@ -22,8 +22,11 @@ describe("Cypher Evaluation Chain", () => {
 
     llm = new ChatOpenAI({
       openAIApiKey: process.env.OPENAI_API_KEY,
-      modelName: "gpt-4",
+      modelName: "gpt-3.5-turbo",
       temperature: 0,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     chain = await initCypherEvaluationChain(llm);

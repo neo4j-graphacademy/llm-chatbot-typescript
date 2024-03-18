@@ -18,6 +18,9 @@ describe("Authoritative Answer Generation Chain", () => {
       openAIApiKey: process.env.OPENAI_API_KEY,
       modelName: "gpt-3.5-turbo",
       temperature: 0,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     chain = await initGenerateAuthoritativeAnswerChain(llm);

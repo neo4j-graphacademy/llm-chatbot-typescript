@@ -18,6 +18,9 @@ describe("Speculative Answer Generation Chain", () => {
       openAIApiKey: process.env.OPENAI_API_KEY,
       modelName: "gpt-3.5-turbo",
       temperature: 0,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     chain = await initGenerateAnswerChain(llm);
@@ -51,7 +54,7 @@ describe("Speculative Answer Generation Chain", () => {
 
       expect(`${evaluation.toLowerCase()} - ${response}`).toContain("yes");
       // end::eval[]
-    });
+    }, 10000);
 
     it("should refuse to answer if information is not in context", async () => {
       const question = "Who directed the matrix?";
@@ -63,7 +66,7 @@ describe("Speculative Answer Generation Chain", () => {
 
       const evaluation = await evalChain.invoke({ question, response });
       expect(`${evaluation.toLowerCase()} - ${response}`).toContain("no");
-    });
+    }, 10000);
 
     it("should answer this one??", async () => {
       const role = "The Chief";
@@ -78,6 +81,6 @@ describe("Speculative Answer Generation Chain", () => {
 
       const evaluation = await evalChain.invoke({ question, response });
       expect(`${evaluation.toLowerCase()} - ${response}`).toContain("yes");
-    });
+    }, 10000);
   });
 });
