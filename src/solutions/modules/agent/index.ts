@@ -19,6 +19,9 @@ export async function call(input: string, sessionId: string): Promise<string> {
   // tag::embeddings[]
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
+    configuration: {
+      baseURL: process.env.OPENAI_API_BASE,
+    },
   });
   // end::embeddings[]
   // tag::graph[]

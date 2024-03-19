@@ -33,6 +33,9 @@ describe("Langchain Agent", () => {
 
     embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     executor = await initAgent(llm, embeddings, graph);

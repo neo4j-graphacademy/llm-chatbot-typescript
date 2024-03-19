@@ -35,6 +35,9 @@ describe("Vector Retrieval Chain", () => {
 
     embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     chain = await initVectorRetrievalChain(llm, embeddings);

@@ -23,6 +23,9 @@ describe("Tool Chain", () => {
 
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     const tools = await initTools(llm, embeddings, graph);

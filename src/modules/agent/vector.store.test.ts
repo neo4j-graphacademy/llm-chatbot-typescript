@@ -9,6 +9,9 @@ describe("Vector Store", () => {
   it("should instantiate a new vector store", async () => {
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
     const vectorStore = await initVectorStore(embeddings);
     expect(vectorStore).toBeInstanceOf(Neo4jVectorStore);
@@ -20,6 +23,9 @@ describe("Vector Store", () => {
     const indexName = "test-index";
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY as string,
+      configuration: {
+        baseURL: process.env.OPENAI_API_BASE,
+      },
     });
 
     const index = await Neo4jVectorStore.fromTexts(
