@@ -60,7 +60,7 @@ describe("Cypher QA Chain", () => {
     );
 
     expect(output).toContain(res[0].count);
-  }, 20000);
+  });
 
   it("should answer a random question", async () => {
     const sessionId = "cypher-retrieval-2";
@@ -118,7 +118,7 @@ describe("Cypher QA Chain", () => {
       expect(first.rephrasedQuestion).toEqual(rephrasedQuestion);
       expect(first.output).toEqual(output);
     }
-  }, 20000);
+  });
 
   it("should use elementId() to return a node ID", async () => {
     const sessionId = "cypher-retrieval-3";
@@ -174,7 +174,7 @@ describe("Cypher QA Chain", () => {
         expect(contextIds).toContain(id);
       }
     }
-  }, 20000);
+  });
 
   describe("recursivelyEvaluate", () => {
     it("should correct a query with a missing variable", async () => {
@@ -185,7 +185,7 @@ describe("Cypher QA Chain", () => {
       );
 
       expect(res).toBeDefined();
-    }, 20000);
+    });
   });
 
   describe("getResults", () => {
@@ -200,6 +200,6 @@ describe("Cypher QA Chain", () => {
 
       expect(res).toBeDefined();
       expect(JSON.stringify(res)).toContain("The Chief");
-    }, 20000);
+    });
   });
 });

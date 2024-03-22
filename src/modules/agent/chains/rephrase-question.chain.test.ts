@@ -43,7 +43,7 @@ describe("Rephrase Question Chain", () => {
       llm,
       new StringOutputParser(),
     ]);
-  }, 10000);
+  });
 
   describe("Rephrasing Questions", () => {
     it("should handle a question with no history", async () => {
@@ -75,7 +75,7 @@ describe("Rephrase Question Chain", () => {
 
       const evaluation = await evalChain.invoke({ input, response });
       expect(`${evaluation.toLowerCase()} - ${response}`).toContain("yes");
-    }, 10000);
+    });
 
     it("should ask for clarification if a question does not make sense", async () => {
       const input = "What about last week?";

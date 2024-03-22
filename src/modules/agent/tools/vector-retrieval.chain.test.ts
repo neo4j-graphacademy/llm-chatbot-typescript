@@ -99,5 +99,5 @@ describe("Vector Retrieval Chain", () => {
     }
 
     expect(found).toBe(true);
-  }, 20000);
+  });
 });

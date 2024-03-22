@@ -33,7 +33,7 @@ export async function getHistory(
   // TODO: Execute the Cypher statement from /cypher/get-history.cypher in a read transaction
   // TODO: Use string templating to make the limit dynamic: 0..${limit}
   // const graph = await initGraph()
-  // const res = await graph.query<PersistedChatbotResponse>(cypher, { sessionId }, "READ")
+  // const res = await graph.query<ChatbotResponse>(cypher, { sessionId }, "READ")
   // return res
 }
 // end::get[]

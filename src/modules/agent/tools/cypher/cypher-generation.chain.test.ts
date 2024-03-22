@@ -46,7 +46,7 @@ describe("Cypher Generation Chain", () => {
     expect(output).toContain(":Movie");
     expect(output.toLowerCase()).toContain("return");
     expect(output.toLowerCase()).toContain("count(");
-  }, 20000);
+  });
 
   it("should generate a Cypher statement with a relationship", async () => {
     const output = await chain.invoke("Who directed The Matrix?");
@@ -56,7 +56,7 @@ describe("Cypher Generation Chain", () => {
     expect(output).toContain(":DIRECTED]");
     expect(output.toLowerCase()).toContain("return");
     expect(output.toLowerCase()).toContain("_id");
-  }, 20000);
+  });
 
   it("should extract IDs", () => {
     const ids = extractIds([

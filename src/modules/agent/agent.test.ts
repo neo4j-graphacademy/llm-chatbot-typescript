@@ -85,6 +85,6 @@ describe("Langchain Agent", () => {
 
         expect(found).toBe(true);
       }
-    }, 160000);
+    });
   });
 });
