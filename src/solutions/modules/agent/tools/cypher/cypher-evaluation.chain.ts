@@ -81,10 +81,12 @@ export default async function initCypherEvaluationChain(
   // end::prompt[]
 
   // tag::runnable[]
+  // tag::startsequence[]
   return RunnableSequence.from<
     CypherEvaluationChainInput,
     CypherEvaluationChainOutput
   >([
+    // eend::startsequence[]
     // tag::assign[]
     RunnablePassthrough.assign({
       // Convert errors into an LLM-friendly list
@@ -107,7 +109,9 @@ export default async function initCypherEvaluationChain(
     llm,
     new JsonOutputParser<CypherEvaluationChainOutput>(),
     // end::rest[]
+    // tag::endsequence[]
   ]);
+  // end::endsequence[]
   // end::runnable[]
 }
 // end::function[]
