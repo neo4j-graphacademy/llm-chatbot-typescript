@@ -86,7 +86,7 @@ export default async function initCypherEvaluationChain(
     CypherEvaluationChainInput,
     CypherEvaluationChainOutput
   >([
-    // eend::startsequence[]
+    // end::startsequence[]
     // tag::assign[]
     RunnablePassthrough.assign({
       // Convert errors into an LLM-friendly list
