@@ -1,0 +1,27 @@
+{
+	"name": "Building Neo4j Applications with Node.js",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node",
+	"postCreateCommand": "bash .devcontainer/post_create.sh",
+    "portsAttributes": {
+		"3000": {
+		"label": "Application",
+		"onAutoForward": "openPreview"
+		}
+	},
+	"forwardPorts": [
+		3000
+		],
+	"customizations": {
+		"codespaces": {
+			"openFiles": [
+				"SETUP.md",
+				".env.example"
+				]
+		},
+		"vscode": {
+			"extensions": [
+				"formulahendry.code-runner"
+				]
+		}
+	}
+}
