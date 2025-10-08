@@ -1,5 +1,5 @@
 {
-	"name": "Building Neo4j Applications with Node.js",
+	"name": "Build a Neo4j-backed Chatbot with TypeScript",
 	"image": "mcr.microsoft.com/devcontainers/typescript-node",
 	"postCreateCommand": "bash .devcontainer/post_create.sh",
     "portsAttributes": {
